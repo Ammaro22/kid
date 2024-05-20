@@ -13,30 +13,40 @@ class UserController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
+
     public function signup(Request $request)
     {
         $validator = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|string|max:255',
             'password' => 'required|string|min:4|max:15',
             'phone' => 'required|string|max:10|min:10',
             'age' => 'string',
-            'image' => 'string',
+            'image' => 'image',
             'certificate' => 'string',
             'role_id'
         ]);
 
         $validator['password'] = bcrypt($request->password);
 
-
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $newImage = time() . $image->getClientOriginalName();
+            $image->move(public_path('upload'), $newImage);
+            $path = "upload/$newImage";
+        } else {
+            $path = null;
+        }
 
         $user = User::create([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'password' => $validator['password'],
             'email' => $request->email,
             'age' => $request->age,
             'phone' => $request->phone,
-            'image' => $request->image,
+            'image' => $path,
             'certificate' => $request->certificate,
             'role_id' => $request->role_id
         ]);
@@ -44,6 +54,7 @@ class UserController extends BaseController
         $accessToken = $user->createToken('authToken')->accessToken;
         return response()->json(['user' => $user, 'access_token' => $accessToken]);
     }
+
     public function login(Request $request)
     {
         $data = Validator::make($request->all(), [
@@ -74,61 +85,7 @@ class UserController extends BaseController
         ]);
 
     }
-//    public function update(Request $request)
-//    {
-//        $user = auth()->user();
-//
-//        $data = Validator::make($request->all(), [
-//            'password' => 'required|string|min:4',
-//        ]);
-//
-//        if ($data->fails()) {
-//            return response()->json(['error' => $data->errors()], 400);
-//        }
-//
-//        if ($request->hasFile('image')) {
-//            $image = $request->file('image');
-//            $newImage = time().$image->getClientOriginalName();
-//            $image->move(public_path('upload') , $newImage);
-//            $path = "upload/$newImage";
-//
-//
-//            if ($user->image) {
-//                $imagePath = public_path($user->image);
-//                if (file_exists($imagePath)) {
-//                    unlink($imagePath);
-//                }
-//            }
-//
-//            $user->image = $path;
-//        } elseif ($request->has('delete_image')) {
-//
-//            if ($user->image) {
-//                $imagePath = public_path($user->image);
-//                if (file_exists($imagePath)) {
-//                    unlink($imagePath);
-//                }
-//            }
-//
-//            $user->image = null;
-//        }
-//
-//        $roleId = $request->input('role_id', $user->role_id);
-//        $user->update([
-//            'name' => $request->input('name'),
-//            'email' => $request->input('email'),
-//            'password' => bcrypt($request->input('password')),
-//            'age' => $request->input('age'),
-//            'phone' => $request->input('phone'),
-//            'certificate' => $request->input('certificate'),
-//            'role_id' => $roleId,
-//        ]);
-//
-//        return response()->json([
-//            'message' => 'تم تحديث المستخدم بنجاح',
-//            'user' => $user
-//        ]);
-//    }
+
     public function update(Request $request)
     {
         $user = auth()->user();
@@ -170,8 +127,8 @@ class UserController extends BaseController
 
             $user->image = null;
         }
-
-        $user->name = $request->filled('name') ? $request->input('name') : $user->name;
+        $user->first_name = $request->filled('first_name') ? $request->input('first_name') : $user->first_name;
+        $user->last_name = $request->filled('last_name') ? $request->input('last_name') : $user->last_name;
         $user->email = $request->filled('email') ? $request->input('email') : $user->email;
         $user->password = $request->filled('password') ? bcrypt($request->input('password')) : $user->password;
         $user->age = $request->filled('age') ? $request->input('age') : $user->age;
@@ -200,5 +157,44 @@ class UserController extends BaseController
         ]);
 
     }
+
+    public function
+    getallteacher()
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $users = User::where('role_id', 3)->get();
+
+        return response()->json([
+            'status' => 'success',
+            'users' => $users,
+        ]);
+    }
+
+
+    public function getTeacherById($id)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $user = User::where('id', $id)->where('role_id', 3)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found with the given ID and role',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+        ]);
+    }
+
 
 }

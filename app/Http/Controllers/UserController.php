@@ -150,7 +150,6 @@ class UserController extends BaseController
         if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         $user = User::find($teacherid);
 
         $data = Validator::make($request->all(), [

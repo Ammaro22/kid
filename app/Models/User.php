@@ -22,7 +22,8 @@ class User extends Authenticatable
     protected $primaryKey ='id';
     public $timestamps = true;
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'phone',
@@ -36,7 +37,16 @@ class User extends Authenticatable
     public function role(){
         return $this->belongsTo(Role::class);
     }
+  ///////////////////////////////
+    public function appointments(){
+        return $this->hasMany(Appointment::class,'user_id');
+    }
+    /////////////////////////////////////////////////////////
 
+
+    public function reservstions(){
+        return $this->hasMany(Reservation::class,'user_id');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

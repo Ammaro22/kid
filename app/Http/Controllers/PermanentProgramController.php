@@ -135,6 +135,7 @@ class PermanentProgramController extends Controller
     }
 
 
+<<<<<<< HEAD
 //
 //    public function showProgram($categoryId)
 //    {
@@ -188,6 +189,8 @@ class PermanentProgramController extends Controller
 //            'programs' => $uniquePrograms,
 //        ]);
 //    }
+=======
+>>>>>>> origin/main
 
     public function showProgram($categoryId)
     {
@@ -208,11 +211,17 @@ class PermanentProgramController extends Controller
 
         $uniquePrograms = [];
 
+<<<<<<< HEAD
 
         $programsByDay = [];
 
         foreach ($programs as $program) {
             $dayData = [];
+=======
+        foreach ($programs as $program) {
+            $dayData = [];
+
+>>>>>>> origin/main
             $days = Days_week::all();
 
             foreach ($days as $day) {
@@ -228,6 +237,7 @@ class PermanentProgramController extends Controller
                         ];
                     }
 
+<<<<<<< HEAD
 
                     $dayData[$day->name]['subjects'][] = $subjectName;
                 }
@@ -236,10 +246,21 @@ class PermanentProgramController extends Controller
 
             foreach ($dayData as $day) {
                 $programsByDay[$day['day']][] = $day;
+=======
+                    if (!in_array($subjectName, $dayData[$day->name]['subjects'])) {
+                        $dayData[$day->name]['subjects'][] = $subjectName;
+                    }
+                }
+            }
+
+            if (!empty($dayData)) {
+                $uniquePrograms[] = array_values($dayData);
+>>>>>>> origin/main
             }
         }
 
 
+<<<<<<< HEAD
         $daysOfWeek = ['الأحد', 'الأثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
 
         foreach ($daysOfWeek as $day) {
@@ -255,6 +276,16 @@ class PermanentProgramController extends Controller
     }
 
 
+=======
+        $uniquePrograms = array_unique($uniquePrograms, SORT_REGULAR);
+
+        return response()->json([
+            'status' => 'success',
+            'programs' => array_values($uniquePrograms),
+        ]);
+    }
+
+>>>>>>> origin/main
     public function deleteProgram($programId)
     {
         $userRole = auth()->user()->role_id;

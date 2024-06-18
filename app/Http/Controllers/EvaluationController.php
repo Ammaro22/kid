@@ -161,6 +161,7 @@ class EvaluationController extends Controller
             return response()->json(['message' => 'evaluation not found'], 404);
         }
     }
+
     public function showEvaluationsmonth(Request $request, $studentId)
     {
 
@@ -206,4 +207,117 @@ class EvaluationController extends Controller
         return response()->json(['evaluations' => $evaluations]);
     }
 
+    /*عرض تقيمات الطالب بالنسبة لاهله*/
+//    public function showEvaluationsforparent(Request $request)
+//    {
+//        $day = $request->input('day');
+//        $month = $request->input('month');
+//        $year = $request->input('year');
+//
+//        $user = auth()->user();
+//        $student = $user->Student;
+//
+//        if (!$student) {
+//            return response()->json(['message' => 'Student not found'], 404);
+//        }
+//
+//        $evaluations = $student->evaluation1->filter(function ($evaluation) use ($day, $month, $year) {
+//            return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+//        });
+//
+//        $noteIds = $evaluations->pluck('note_id');
+//        $notes = Note::whereIn('id', $noteIds)->get();
+//
+//        $output = [
+//            'evaluation' => $evaluations->toArray(),
+//            'note_teacher' => $notes->toArray(),
+//        ];
+//
+//        if ($evaluations->isNotEmpty()) {
+//            return response()->json($output);
+//        } else {
+//            return response()->json(['message' => 'Evaluation not found'], 404);
+//        }
+//    }
+    public function showEvaluationsforparent(Request $request)
+    {
+        $day = $request->input('day');
+        $month = $request->input('month');
+        $year = $request->input('year');
+        $studentName = $request->input('student_name');
+        $className = $request->input('class_name');
+        $userId = auth()->id();
+
+        $student = Student::whereHas('category', function ($query) use ($className) {
+            $query->where('name', $className);
+        })
+            ->where('name', $studentName)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        $evaluations = $student->evaluation1->filter(function ($evaluation) use ($day, $month, $year) {
+            return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+        });
+
+        $noteIds = $evaluations->pluck('note_id');
+        $notes = Note::whereIn('id', $noteIds)->get();
+
+        $output = [
+            'student_name' => $student->name,
+            'class_name' => $student->category->name,
+            'evaluation' => $evaluations->toArray(),
+            'note_teacher' => $notes->toArray(),
+        ];
+
+        if ($evaluations->isNotEmpty()) {
+            return response()->json($output);
+        } else {
+            return response()->json(['message' => 'Evaluation not found'], 404);
+        }
+    }
+
+    public function showEvaluationsforparentmonth(Request $request)
+    {
+
+        $month = $request->input('month');
+        $year = $request->input('year');
+        $studentName = $request->input('student_name');
+        $className = $request->input('class_name');
+        $userId = auth()->id();
+
+        $student = Student::whereHas('category', function ($query) use ($className) {
+            $query->where('name', $className);
+        })
+            ->where('name', $studentName)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        $evaluations = $student->evaluation1->filter(function ($evaluation) use ( $month, $year) {
+            return  $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+        });
+
+        $noteIds = $evaluations->pluck('note_id');
+        $notes = Note::whereIn('id', $noteIds)->get();
+
+        $output = [
+            'student_name' => $student->name,
+            'class_name' => $student->category->name,
+            'evaluation' => $evaluations->toArray(),
+            'note_teacher' => $notes->toArray(),
+        ];
+
+        if ($evaluations->isNotEmpty()) {
+            return response()->json($output);
+        } else {
+            return response()->json(['message' => 'Evaluation not found'], 404);
+        }
+    }
 }

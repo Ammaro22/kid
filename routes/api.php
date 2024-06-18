@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ClassSupervisorController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NoteController;
@@ -37,18 +39,24 @@ Route::group(["middleware"=>["auth:api"]],function (){
 Route::post('admin_update_techer/{id}',[UserController::class,'updateteacher'])->middleware('auth:api');
 Route::post('show_all_techer',[UserController::class,'getallteacher'])->middleware('auth:api');
 Route::post('show_techer/{id}',[UserController::class,'getteacherbyid'])->middleware('auth:api');
-
+/*تحديد مشرف الصف*/
+Route::post('select_name_teacher',[ClassSupervisorController::class,'storeClassSupervisor'])->middleware('auth:api');
+Route::post('update_name_teacher/{id}',[ClassSupervisorController::class,'updateClassSupervisor'])->middleware('auth:api');
+Route::post('show_supervisor',[ClassSupervisorController::class,'getClassSupervisor']);
+Route::delete('delete_class_supervisor/{id}',[ClassSupervisorController::class,'deleteClassSupervisor']);
 /*الطالب*/
 Route::post('student_registration',[StudentController::class,'store'])->middleware('auth:api');
 Route::post('update_info_student/{id}',[StudentController::class,'update'])->middleware('auth:api');
 Route::post('show_student/{id}',[StudentController::class,'showStudent']);
 Route::delete('delete_student/{id}',[StudentController::class,'destroy'])->middleware('auth:api');
+/*عرض معلومات الطفل لاهله*/
+Route::post('show_student_for_parent',[StudentController::class,'showStudentforparent'])->middleware('auth:api');
 /*تقرير الطلب*/
 Route::post('Record_student',[RecordOrderController::class,'Record'])->middleware('auth:api');
 Route::post('accept_record/{id}', [RecordOrderController::class, 'acceptrecord'])->middleware('auth:api');
 Route::delete('inaccept_record/{id}', [RecordOrderController::class, 'delete_record'])->middleware('auth:api');
-
-
+/*البحث عن طالب*/
+Route::post('search_student',[StudentController::class,'searchStudents']);
 /*الفاتورة*/
 
 Route::post('create_invoice',[InvoiceController::class,'createInvoice'])->middleware('auth:api');
@@ -96,5 +104,20 @@ Route::delete('delete_evaluation/{id}',[EvaluationController::class,'deleteEvalu
 Route::post('show__evaluationstudent_by_day/{id}',[EvaluationController::class,'showEvaluations']);
 Route::post('show__evaluationstudent_by_month/{id}',[EvaluationController::class,'showEvaluationsmonth']);
 Route::post('show__evaluationstudent_by_category/{id}',[EvaluationController::class,'getEvaluationsByCategoryId']);
+/*عرض تقييمات الطفل بالنسبة للاهل*/
+Route::post('show__evaluationstudent_by_day_for_parent',[EvaluationController::class,'showEvaluationsforparent'])->middleware('auth:api');
+Route::post('show__evaluationstudent_by_month_for_parent',[EvaluationController::class,'showEvaluationsforparentmonth'])->middleware('auth:api');
+
 /*أضافة او تعديل الملاحظة التي تضيفها المديرة للطالب*/
 Route::post('update_note_sudent/{id}',[NoteController::class,'updateNoteAdmin'])->middleware('auth:api');
+
+
+//////////////////حضور الطلاب/////////////////
+Route::post('add_attendance',[AttendanceController::class,'add'])->middleware('auth:api');
+Route::get('students_attendance_status/{id}',[AttendanceController::class,'checkStudentAttendanceStatus'])->middleware('auth:api');
+/*عرض حضور الطالب لاهله*/
+Route::get('students_attendance_status_for_parent',[AttendanceController::class,'checkStudentAttendanceStatusforparent'])->middleware('auth:api');
+//////////////////حضور المعلمات/////////////////
+Route::get('make-attendance',[AttendanceController::class,'makeAttendance'])->middleware('auth:api')->name('mark-attendance');
+Route::get('generate_qr_code', [AttendanceController::class, 'generateQrCode'])->middleware('auth:api');
+

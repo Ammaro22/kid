@@ -85,7 +85,7 @@ class ActivityController extends Controller
         $activityNames = [];
 
         foreach ($activities as $activity) {
-            $activityNames[] = $activity->name;
+            $activityNames[] = $activity;
         }
 
         return response()->json([

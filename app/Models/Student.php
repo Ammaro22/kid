@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Imageable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory,Imageable;
     protected $table = 'students';
     protected $primaryKey ='id';
     public $timestamps = true;
@@ -48,6 +49,7 @@ class Student extends Model
         'photo_mother_identity',
         'photo_vaccine_card',
         'category_id',
+        'user_id'
 
     ];
 
@@ -67,5 +69,14 @@ class Student extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+    public function User()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    //////////////Attendance///////////////
+    public function attendance(){
+        return $this->hasMany(Attendance::class,'student_id');
     }
 }

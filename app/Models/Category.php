@@ -21,4 +21,8 @@ class Category extends Model
     public function stu(){
         return $this->hasMany(Student::class,'category_id');
     }
+
+    public function class_sav(){
+        return $this->hasMany(Class_Supervisor::class,'category_id');
+    }
 }

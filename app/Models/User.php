@@ -42,10 +42,26 @@ class User extends Authenticatable
         return $this->hasMany(Appointment::class,'user_id');
     }
     /////////////////////////////////////////////////////////
+    public function Student(){
+        return $this->hasOne(Student::class,'user_id');
+    }
 
+    public function class_s(){
+        return $this->hasMany(Class_Supervisor::class,'user_id');
+    }
 
     public function reservstions(){
         return $this->hasMany(Reservation::class,'user_id');
+    }
+
+    ////////////////Attendance//////////////////
+    public function attendances(){
+        return $this->hasMany(Attendance::class,'user_id');
+    }
+
+    ////////////////AttendanceT//////////////////
+    public function attendanceT(){
+        return $this->hasMany(AttendanceT::class,'user_id');
     }
     /**
      * The attributes that should be hidden for serialization.

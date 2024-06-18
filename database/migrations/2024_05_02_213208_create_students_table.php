@@ -49,7 +49,7 @@ return new class extends Migration
             $table->string('photo_mother_identity');
             $table->string('photo_vaccine_card');
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
-
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }

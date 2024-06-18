@@ -221,21 +221,32 @@ class UserController extends BaseController
 
     }
 
-    public function
-    getallteacher()
+//    public function getallteacher()
+//    {
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 1 && $userRole !== 2) {
+//            return response()->json(['message' => 'Unauthorized'], 401);
+//        }
+//        $users = User::where('role_id', 3)->get();
+//
+//        return response()->json([
+//            'status' => 'success',
+//            'users' => $users,
+//        ]);
+//    }
+    public function getallteacher()
     {
         $userRole = auth()->user()->role_id;
         if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $users = User::where('role_id', 3)->get();
+        $users = User::where('role_id', 3)->select('name', 'image')->get();
 
         return response()->json([
             'status' => 'success',
             'users' => $users,
         ]);
     }
-
 
     public function getTeacherById($id)
     {

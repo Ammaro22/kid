@@ -53,6 +53,14 @@ class PermanentProgramController extends Controller
 
             foreach ($subjectNames as $subjectName) {
                 $subject = Subject::where('name', $subjectName)->first();
+                if (!$subject) {
+
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'supject not found',
+                    ]);
+
+                }
 
                 if ($subject) {
                     $daySubject = Day_Subject::create([
@@ -121,6 +129,14 @@ class PermanentProgramController extends Controller
 
             foreach ($subjectNames as $subjectName) {
                 $subject = Subject::where('name', $subjectName)->first();
+                if (!$subject) {
+
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'supject not found',
+                    ]);
+
+                }
 
                 if ($subject) {
                     $daySubject = new Day_Subject();

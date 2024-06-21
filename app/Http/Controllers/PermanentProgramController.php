@@ -80,16 +80,88 @@ class PermanentProgramController extends Controller
 
 
 
-    public function updateProgramSubjects(Request $request,$category_id)
+//    public function updateProgramSubjects(Request $request,$category_id)
+//    {
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 1 && $userRole !== 2) {
+//            return response()->json(['message' => 'Unauthorized'], 401);
+//        }
+//
+//
+//        $category = Category::find($category_id);
+//
+//        if (!$category) {
+//            return response()->json(['message' => 'Category not found'], 404);
+//        }
+//
+//        $programData = $request->input('program');
+//
+//        foreach ($programData as $dayData) {
+//            $dayName = $dayData['day'];
+//            $subjectNames = $dayData['subjects'];
+//
+//            $day = Days_week::where('name', $dayName)->first();
+//
+//            if (!$day) {
+//
+//                    return response()->json([
+//                        'status' => 'error',
+//                        'message' => 'day not found',
+//                    ]);
+//
+//            }
+//
+//            $permanentProgram = Permanent_program::where('category_id', $category_id)->first();
+//
+//            if (!$permanentProgram) {
+//                $permanentProgram = Permanent_program::create([
+//                    'category_id' => $category_id,
+//                ]);
+//            }
+//
+//            $existingDaySubjects = Day_Subject::where('days_week_id', $day->id)
+//                ->where('permanent_program_id', $permanentProgram->id)
+//                ->get();
+//
+//            foreach ($existingDaySubjects as $existingDaySubject) {
+//                $existingDaySubject->delete();
+//            }
+//
+//            foreach ($subjectNames as $subjectName) {
+//                $subject = Subject::where('name', $subjectName)->first();
+//                if (!$subject) {
+//
+//                    return response()->json([
+//                        'status' => 'error',
+//                        'message' => 'supject not found',
+//                    ]);
+//
+//                }
+//
+//                if ($subject) {
+//                    $daySubject = new Day_Subject();
+//                    $daySubject->days_week_id = $day->id;
+//                    $daySubject->subject_id = $subject->id;
+//                    $daySubject->permanent_program_id = $permanentProgram->id;
+//                    $daySubject->save();
+//                }
+//            }
+//        }
+//
+//        return response()->json([
+//            'status' => 'success',
+//            'message' => 'Program subjects updated successfully',
+//        ]);
+//    }
+
+    public function updateProgramSubjects(Request $request, $category_id)
     {
         $userRole = auth()->user()->role_id;
         if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-
         $category = Category::find($category_id);
-
         if (!$category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
@@ -101,50 +173,40 @@ class PermanentProgramController extends Controller
             $subjectNames = $dayData['subjects'];
 
             $day = Days_week::where('name', $dayName)->first();
-
             if (!$day) {
-
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'day not found',
-                    ]);
-
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Day not found',
+                ]);
             }
 
             $permanentProgram = Permanent_program::where('category_id', $category_id)->first();
-
             if (!$permanentProgram) {
                 $permanentProgram = Permanent_program::create([
                     'category_id' => $category_id,
                 ]);
             }
 
-            $existingDaySubjects = Day_Subject::where('days_week_id', $day->id)
+            // حذف المواد الدراسية القديمة للاليوم
+            Day_Subject::where('days_week_id', $day->id)
                 ->where('permanent_program_id', $permanentProgram->id)
-                ->get();
+                ->delete();
 
-            foreach ($existingDaySubjects as $existingDaySubject) {
-                $existingDaySubject->delete();
-            }
-
+            // إضافة المواد الدراسية الجديدة للاليوم
             foreach ($subjectNames as $subjectName) {
                 $subject = Subject::where('name', $subjectName)->first();
                 if (!$subject) {
-
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'supject not found',
+                        'message' => 'Subject not found',
                     ]);
-
                 }
 
-                if ($subject) {
-                    $daySubject = new Day_Subject();
-                    $daySubject->days_week_id = $day->id;
-                    $daySubject->subject_id = $subject->id;
-                    $daySubject->permanent_program_id = $permanentProgram->id;
-                    $daySubject->save();
-                }
+                $daySubject = new Day_Subject();
+                $daySubject->days_week_id = $day->id;
+                $daySubject->subject_id = $subject->id;
+                $daySubject->permanent_program_id = $permanentProgram->id;
+                $daySubject->save();
             }
         }
 

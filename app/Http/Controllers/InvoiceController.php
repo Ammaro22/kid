@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Invoice;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -115,8 +116,80 @@ class InvoiceController extends Controller
 
         return response()->json([
             'status' => true,
-            'total' => $total
+            'total' => $total,
+            'invoices'=>$invoices
         ]);
     }
+
+    public function getStudentInvoicesByCategoryTotal($categoryId)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $invoices = Invoice::whereHas('Studen2', function ($query) use ($categoryId) {
+            $query->where('category_id', $categoryId);
+        })->get();
+
+        if ($invoices->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'No invoices found for the selected category'
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'invoices' => $invoices
+        ]);
+    }
+    public function getTotalInvoicesByCategory()
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+
+        $categories = Category::with(['stu' => function ($query) {
+            $query->with('invoice');
+        }])->get();
+
+        $totalByCategory = [];
+
+        foreach ($categories as $category) {
+            $total = 0;
+            foreach ($category->stu as $student) {
+                foreach ($student->invoice as $invoice) {
+                    $total += $invoice->batch;
+                }
+            }
+            $totalByCategory[$category->name] = $total;
+        }
+
+        return response()->json([
+            'status' => true,
+            'totals' => $totalByCategory
+        ]);
+    }
+
+    public function getInvoicesByStudent()
+    {
+        $user = auth()->user();
+        $students = $user->Student()->with('invoice')->get();
+
+        // استخدام Collection لتحسين تجميع الفواتير
+        $invoicesByStudent = $students->mapWithKeys(function ($student) {
+            return [$student->name => $student->invoices];
+        });
+
+        return response()->json([
+            'status' => true,
+            'invoices' => $invoicesByStudent
+        ]);
+    }
+
+
 
 }

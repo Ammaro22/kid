@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Evaluation;
+use App\Models\Image_child;
 use App\Models\Note;
 use App\Models\Student;
 use App\Models\Subject;
@@ -239,6 +240,8 @@ class EvaluationController extends Controller
 //            return response()->json(['message' => 'Evaluation not found'], 404);
 //        }
 //    }
+
+
     public function showEvaluationsforparent(Request $request)
     {
         $day = $request->input('day');
@@ -259,8 +262,14 @@ class EvaluationController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
+        $studentId = $student->id;
+
+        $images = Image_child::where('student_id', $studentId)->get();
+
         $evaluations = $student->evaluation1->filter(function ($evaluation) use ($day, $month, $year) {
-            return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+            return $evaluation->created_at->format('d') == $day &&
+                $evaluation->created_at->format('m') == $month &&
+                $evaluation->created_at->format('Y') == $year;
         });
 
         $noteIds = $evaluations->pluck('note_id');
@@ -271,6 +280,7 @@ class EvaluationController extends Controller
             'class_name' => $student->category->name,
             'evaluation' => $evaluations->toArray(),
             'note_teacher' => $notes->toArray(),
+            'images' => $images->toArray()
         ];
 
         if ($evaluations->isNotEmpty()) {
@@ -279,6 +289,7 @@ class EvaluationController extends Controller
             return response()->json(['message' => 'Evaluation not found'], 404);
         }
     }
+
 
     public function showEvaluationsforparentmonth(Request $request)
     {
@@ -295,6 +306,9 @@ class EvaluationController extends Controller
             ->where('name', $studentName)
             ->where('user_id', $userId)
             ->first();
+        $studentId = $student->id;
+
+        $images = Image_child::where('student_id', $studentId)->get();
 
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
@@ -312,6 +326,7 @@ class EvaluationController extends Controller
             'class_name' => $student->category->name,
             'evaluation' => $evaluations->toArray(),
             'note_teacher' => $notes->toArray(),
+            'images' => $images->toArray()
         ];
 
         if ($evaluations->isNotEmpty()) {

@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClassSupervisorController;
+use App\Http\Controllers\DisbursedInvoiceController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NoteController;
@@ -62,8 +63,12 @@ Route::post('search_student',[StudentController::class,'searchStudents']);
 Route::post('create_invoice',[InvoiceController::class,'createInvoice'])->middleware('auth:api');
 Route::post('update_invoice',[InvoiceController::class,'updateInvoice'])->middleware('auth:api');
 Route::delete('delete_invoice/{id}',[InvoiceController::class,'deleteInvoice'])->middleware('auth:api');
-Route::post('sum_invoices/{id}', [InvoiceController::class, 'getStudentInvoicesTotal'])->middleware('auth:api');
+Route::post('get&&sum_invoices/{id}', [InvoiceController::class, 'getStudentInvoicesTotal'])->middleware('auth:api');
+Route::post('get_invoices_by_category/{id}', [InvoiceController::class, 'getStudentInvoicesByCategoryTotal'])->middleware('auth:api');
+Route::get('get_total_invoices_for_category', [InvoiceController::class, 'getTotalInvoicesByCategory'])->middleware('auth:api');
 
+/*فواتير الابناء بالنسة للاهل*/
+Route::get('get_invoices_for_parent',[InvoiceController::class,'getInvoicesByStudent'])->middleware('auth:api');
 /*الاحداث*/
 
 Route::post('create_activity',[ActivityController::class,'create'])->middleware('auth:api');
@@ -121,3 +126,11 @@ Route::get('students_attendance_status_for_parent',[AttendanceController::class,
 Route::get('make-attendance',[AttendanceController::class,'makeAttendance'])->middleware('auth:api')->name('mark-attendance');
 Route::get('generate_qr_code', [AttendanceController::class, 'generateQrCode'])->middleware('auth:api');
 
+/*السجلات المالية*/
+Route::post('disbursed_invoices',[DisbursedInvoiceController::class,'createDisbursedInvoice'])->middleware('auth:api');
+Route::post('update_disbursed_invoices/{id}',[DisbursedInvoiceController::class,'updateDisbursedInvoice'])->middleware('auth:api');
+Route::get('show_disbursed_invoices_by_invoice_type/{id}',[DisbursedInvoiceController::class,'getDisbursedInvoicesByType'])->middleware('auth:api');
+Route::get('show_all_disbursed_invoices',[DisbursedInvoiceController::class,'getAllDisbursedInvoices'])->middleware('auth:api');
+Route::get('get_total__price_disbursed_invoices_by_invoice_type/{id}',[DisbursedInvoiceController::class,'getTotalPriceByInvoiceType'])->middleware('auth:api');
+Route::get('get_total__price_disbursed_invoices',[DisbursedInvoiceController::class,'getTotalPrice'])->middleware('auth:api');
+Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::class,'deleteDisbursedInvoice'])->middleware('auth:api');

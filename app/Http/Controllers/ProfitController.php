@@ -12,7 +12,10 @@ class ProfitController extends Controller
 {
     public function calculateProfit()
     {
-
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 ) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
         $totalInvoices = Invoice::sum('batch');
 
         $totalDisbursedInvoices = Disbursed_invoice::sum('price');
@@ -28,6 +31,10 @@ class ProfitController extends Controller
 
     public function showProfit(Request $request)
     {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 ) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
         $day = $request->input('day');
         $month = $request->input('month');
         $year = $request->input('year');

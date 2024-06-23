@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Image_child;
 use App\Models\Invoice;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -174,19 +175,39 @@ class InvoiceController extends Controller
         ]);
     }
 
+//    public function getInvoicesByStudent()
+//    {
+//        $user = auth()->user();
+//        $students = $user->Student()->with('invoice')->get();
+//
+//        $invoicesByStudent = $students->mapWithKeys(function ($student) {
+//            return [$student->name => $student->invoice];
+//        });
+//
+//        return response()->json([
+//            'status' => true,
+//            'students' => $invoicesByStudent
+//        ]);
+//    }
+
     public function getInvoicesByStudent()
     {
         $user = auth()->user();
-        $students = $user->Student()->with('invoice')->get();
+        $students = $user->Student()->with('invoice', 'image_c')->get();
 
-        // استخدام Collection لتحسين تجميع الفواتير
         $invoicesByStudent = $students->mapWithKeys(function ($student) {
-            return [$student->name => $student->invoices];
+            $studentImages = Image_child::where('student_id', $student->id)->get();
+            return [
+                $student->name => [
+                    'invoices' => $student->invoice,
+                    'images' => $studentImages
+                ]
+            ];
         });
 
         return response()->json([
             'status' => true,
-            'invoices' => $invoicesByStudent
+            'students' => $invoicesByStudent
         ]);
     }
 

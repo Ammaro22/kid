@@ -82,16 +82,23 @@ class ActivityController extends Controller
     public function showAllActivity()
     {
         $activities = Activity::all();
-        $activityNames = [];
 
+        $data = [];
         foreach ($activities as $activity) {
-            $activityNames[] = $activity;
+            $files = File::where('activity_id', $activity->id)->get();
+            $images = Image::where('activity_id', $activity->id)->get();
+
+            $data[] = [
+                'activity' => $activity,
+                'files' => $files,
+                'images' => $images
+            ];
         }
 
-        return response()->json([
-            'activities' => $activityNames
-        ], 200);
+        return response()->json($data, 200);
     }
+
+
 
 
     public function update(Request $request, $id)

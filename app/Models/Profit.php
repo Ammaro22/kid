@@ -12,6 +12,6 @@ class Profit extends Model
     protected $primaryKey ='id';
     public $timestamps = true;
     protected $fillable = [
-      'profit'
+      'profits'
     ];
 }

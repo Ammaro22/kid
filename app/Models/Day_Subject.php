@@ -13,7 +13,7 @@ class Day_Subject extends Model
     public $timestamps = true;
     protected $fillable = [
         'days_week_id',
-        'permanent_program_id',
+        'category_id',
         'subject_id'
     ];
     public function perm()
@@ -25,5 +25,8 @@ class Day_Subject extends Model
     }
     public function subje(){
         return $this->belongsTo(Subject::class,'subject_id');
+    }
+    public function cat(){
+        return $this->belongsTo(Category::class,'category_id');
     }
 }

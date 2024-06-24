@@ -14,11 +14,7 @@ class Permanent_program extends Model
     protected $fillable = [
         'category_id',
     ];
-    public function cat(){
-        return $this->belongsTo(Category::class);
-    }
 
-    public function day_s(){
-        return $this->hasMany(Day_Subject::class,'permanent_program_id');
-    }
+
+
 }

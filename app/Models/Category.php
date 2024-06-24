@@ -25,4 +25,7 @@ class Category extends Model
     public function class_sav(){
         return $this->hasMany(Class_Supervisor::class,'category_id');
     }
+    public function day_s(){
+        return $this->hasMany(Day_Subject::class,'category_id');
+    }
 }

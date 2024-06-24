@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->foreignId('days_week_id')->constrained('days_weeks')->cascadeOnDelete();
-            $table->foreignId('permanent_program_id')->constrained('permanent_programs')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->timestamps();
         });
     }

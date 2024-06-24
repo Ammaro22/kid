@@ -34,9 +34,9 @@ class ReservationController extends Controller
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
             $reservations = Reservation::where('reservations.status', 'Not Accept')
-                ->with('user:id,first_name,last_name')
+                ->with('user:id,first_name,last_name,image')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
-                ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
+                ->select('reservations.description', 'reservations.user_id', 'reservations.id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
                 ->get();
 
             return response()->json($reservations);
@@ -47,9 +47,9 @@ class ReservationController extends Controller
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
             $reservations = Reservation::where('reservations.status','accept')
-                ->with('user:id,first_name,last_name')
+                ->with('user:id,first_name,last_name,image')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
-                ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
+                ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'reservations.id','appointments.the_day', 'appointments.the_time')
                 ->get();
 
             return response()->json($reservations);
@@ -115,10 +115,10 @@ class ReservationController extends Controller
 
         if (Auth::user()->role_id == 4 ) {
 
-            $reservations = Reservation::where('reservations.status', 'Accept')
-                ->with('user:id,first_name,last_name')
+            $reservations = Reservation::where('reservations.status', 'accept')
+                ->with('user:id,first_name,last_name,image')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
-                ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
+                ->select('reservations.description', 'reservations.user_id', 'reservations.id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
                 ->get();
 
             return response()->json($reservations);

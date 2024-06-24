@@ -33,7 +33,20 @@ class ReservationController extends Controller
     public function view()
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
-            $reservations = Reservation::where('reservations.status', 'Not Accept')
+            $reservations = Reservation::where('reservations.status', 'Not Accept','Accept')
+                ->with('user:id,first_name,last_name')
+                ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
+                ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
+                ->get();
+
+            return response()->json($reservations);
+        }
+    }
+
+    public function viewaccept()
+    {
+        if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
+            $reservations = Reservation::where('reservations.status','Accept')
                 ->with('user:id,first_name,last_name')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
                 ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
@@ -116,7 +129,7 @@ class ReservationController extends Controller
 
                 'message' => 'you are not authorized to do this'
 
-            ], 403); 
+            ], 403);
 
         }
 

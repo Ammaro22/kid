@@ -94,8 +94,10 @@ Route::delete('delete_appointments/{id}', [AppointmentController::class,'deleteA
 /////////////reservation/////////////
 
 Route::post('add_reservation',[ReservationController::class,'add'])->middleware('auth:api');
-/*عرض الحجوزات للادمن والمساعدة*/
+/*عرض الحجوزات المقبولة وغير المقبولة للادمن والمساعدة*/
 Route::get('view_reservation_for_admin', [ReservationController::class, 'view'])->middleware('auth:api');
+/*عرض الحجوزات المقبولة للادمن والمساعدة*/
+Route::get('view_accept_reservation_for_admin', [ReservationController::class, 'viewaccept'])->middleware('auth:api');
 /* تاكيد الحجوزات للاهل*/
 Route::post('accept_reservation_by_admin/{id}', [ReservationController::class, 'accept_reservation'])->middleware('auth:api');
 /*عرض الحجوزات للاهل*/

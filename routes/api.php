@@ -81,7 +81,7 @@ Route::delete('delete_activity/{id}',[ActivityController::class,'destroy'])->mid
 
 /*برنامج الدوام*/
 Route::post('create_week/{id}',[PermanentProgramController::class,'createProgram'])->middleware('auth:api');
-Route::post('update_week/{id}',[PermanentProgramController::class,'updateProgramSubjects'])->middleware('auth:api');
+Route::post('update_week/{id}',[PermanentProgramController::class,'updateProgram'])->middleware('auth:api');
 Route::post('show_week/{id}',[PermanentProgramController::class,'showProgram']);
 Route::delete('delete_week/{id}',[PermanentProgramController::class,'deleteProgram'])->middleware('auth:api');
 

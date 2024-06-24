@@ -33,7 +33,7 @@ class ReservationController extends Controller
     public function view()
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
-            $reservations = Reservation::where('reservations.status', 'Not Accept','Accept')
+            $reservations = Reservation::where('reservations.status', 'Not Accept')
                 ->with('user:id,first_name,last_name')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
                 ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
@@ -46,7 +46,7 @@ class ReservationController extends Controller
     public function viewaccept()
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
-            $reservations = Reservation::where('reservations.status','Accept')
+            $reservations = Reservation::where('reservations.status','accept')
                 ->with('user:id,first_name,last_name')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
                 ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')

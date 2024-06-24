@@ -149,13 +149,19 @@ class PermanentProgramController extends Controller
             ], 400);
         }
 
-        // First, delete all old program days
-        $oldDaySubjects = Day_Subject::where('category_id', $categoryId)->get();
-        foreach ($oldDaySubjects as $oldDaySubject) {
-            $oldDaySubject->delete();
+        // حذف الأيام القديمة التي تم تحديثها
+        foreach ($newProgram as $dayData) {
+            $dayName = $dayData['day'];
+            $day = Days_week::where('name', $dayName)->first();
+
+            if ($day) {
+                Day_Subject::where('days_week_id', $day->id)
+                    ->where('category_id', $categoryId)
+                    ->delete();
+            }
         }
 
-        // Now, store the new program
+        // تخزين البرنامج الجديد
         foreach ($newProgram as $dayData) {
             $dayName = $dayData['day'];
             $subjectNames = $dayData['subjects'];

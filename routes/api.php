@@ -136,5 +136,5 @@ Route::get('get_total__price_disbursed_invoices_by_invoice_type/{id}',[Disbursed
 Route::get('get_total__price_disbursed_invoices',[DisbursedInvoiceController::class,'getTotalPrice'])->middleware('auth:api');
 Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::class,'deleteDisbursedInvoice'])->middleware('auth:api');
 /*الربح*/
-Route::get('calculate_Profit',[ProfitController::class,'calculateProfit']);
-Route::get('show_Profit_by_day',[ProfitController::class,'showProfit']);
+Route::get('calculate_Profit',[ProfitController::class,'calculateProfit'])->middleware('auth:api');
+Route::get('show_Profit_by_day',[ProfitController::class,'showProfit'])->middleware('auth:api');

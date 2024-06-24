@@ -29,11 +29,12 @@ class ReservationController extends Controller
     }
 
     ////////////عرض الطلبات المحجوزة للمديرة والمساعدة/////////////////
+
     public function view()
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
             $reservations = Reservation::where('reservations.status', 'Not Accept')
-                ->with('user:id,name')
+                ->with('user:id,first_name,last_name')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
                 ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
                 ->get();
@@ -41,6 +42,7 @@ class ReservationController extends Controller
             return response()->json($reservations);
         }
     }
+
 
     /////////////////تاكيد طلب الاهل من قبل الموديرة/////////////
     public function accept_reservation($id)
@@ -65,7 +67,7 @@ class ReservationController extends Controller
 
                 return response()->json([
 
-                    'message' => 'تم حجز الموعد بنجاح',
+                    'message' => 'Appointment booked successfully',
 
                     'reservation' => $reservation
 
@@ -75,7 +77,7 @@ class ReservationController extends Controller
 
                 return response()->json([
 
-                    'message' => 'الحجز المطلوب غير موجود أو تم قبوله بالفعل'
+                    'message' => 'The requested reservation does not exist or has already been accepted'
 
                 ]);
 
@@ -85,9 +87,9 @@ class ReservationController extends Controller
 
             return response()->json([
 
-                'message' => 'غير مصرح لك بالوصول'
+                'message' => 'you are not authorized to do this'
 
-            ], 403); // Forbidden status code
+            ], 403);
 
         }
 
@@ -101,7 +103,7 @@ class ReservationController extends Controller
         if (Auth::user()->role_id == 4 ) {
 
             $reservations = Reservation::where('reservations.status', 'Accept')
-                ->with('user:id,name')
+                ->with('user:id,first_name,last_name')
                 ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
                 ->select('reservations.description', 'reservations.user_id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
                 ->get();
@@ -112,9 +114,9 @@ class ReservationController extends Controller
 
             return response()->json([
 
-                'message' => 'غير مصرح لك بالوصول'
+                'message' => 'you are not authorized to do this'
 
-            ], 403); // Forbidden status code
+            ], 403); 
 
         }
 

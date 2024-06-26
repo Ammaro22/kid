@@ -51,10 +51,13 @@ Route::post('student_registration',[StudentController::class,'store'])->middlewa
 Route::post('update_info_student/{id}',[StudentController::class,'update'])->middleware('auth:api');
 Route::post('show_student/{id}',[StudentController::class,'showStudent']);
 Route::delete('delete_student/{id}',[StudentController::class,'destroy'])->middleware('auth:api');
+Route::get('show_student_by_category/{id}',[StudentController::class,'showStudentsbycategory']);
 /*عرض معلومات الطفل لاهله*/
 Route::post('show_student_for_parent',[StudentController::class,'showStudentforparent'])->middleware('auth:api');
 /*تقرير الطلب*/
 Route::post('Record_student',[RecordOrderController::class,'Record'])->middleware('auth:api');
+Route::get('show_all_Record_student',[RecordOrderController::class,'showAllRecords'])->middleware('auth:api');
+Route::get('show_Record_student/{id}',[RecordOrderController::class,'showRecordDetails'])->middleware('auth:api');
 Route::post('accept_record/{id}', [RecordOrderController::class, 'acceptrecord'])->middleware('auth:api');
 Route::delete('inaccept_record/{id}', [RecordOrderController::class, 'delete_record'])->middleware('auth:api');
 /*البحث عن طالب*/
@@ -128,6 +131,8 @@ Route::get('students_attendance_status_for_parent',[AttendanceController::class,
 //////////////////حضور المعلمات/////////////////
 Route::get('make-attendance',[AttendanceController::class,'makeAttendance'])->middleware('auth:api')->name('mark-attendance');
 Route::get('generate_qr_code', [AttendanceController::class, 'generateQrCode'])->middleware('auth:api');
+////////////////// عرض حضور الخاص بالمديرة/////////////////
+Route::get('get_all_attendance', [AttendanceController::class, 'getAllAttendance'])->middleware('auth:api');
 
 /*السجلات المالية*/
 Route::post('disbursed_invoices',[DisbursedInvoiceController::class,'createDisbursedInvoice'])->middleware('auth:api');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Image_child;
 use App\Models\Student;
 use App\Models\User;
@@ -244,6 +245,45 @@ class StudentController extends Controller
         200);
     }
 
+
+    public function showStudentsbycategory($categoryId)
+    {
+        $category = Category::find($categoryId);
+
+        if (!$category) {
+            return response()->json(['error' => 'Category not found'], 404);
+        }
+
+        $students = Student::where('category_id', $categoryId)->get();
+
+        $studentsData = [];
+        foreach ($students as $student) {
+            $user = User::find($student->user_id);
+            $nameUser = $user ? $user->first_name . ' ' . $user->last_name : null;
+
+            $studentImages = Image_child::where('student_id', $student->id)->get();
+
+            $studentData = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'user_name' => $nameUser,
+                'category_id' => $student->category_id,
+                'images' => $studentImages->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'name'=>$image->name,
+                        'path' => $image->path,
+                    ];
+                })->toArray(),
+            ];
+
+            $studentsData[] = $studentData;
+        }
+
+        return response()->json([
+            'studentsData' => $studentsData,
+        ], 200);
+    }
 
     public function destroy($id)
     {

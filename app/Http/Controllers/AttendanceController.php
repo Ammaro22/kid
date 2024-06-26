@@ -90,6 +90,9 @@ class AttendanceController extends Controller
             ]);
             return response()->json(['success' => true, 'message' => 'Attendance marked successfully.'], 201);
         }
+        else{
+            return response()->json(['error' => true, 'message' => 'you are not authorized to do this'], 201);
+        }
     }
 
     //////////////////////
@@ -125,6 +128,22 @@ class AttendanceController extends Controller
         return response()->json([
             'qr_code_path' => Storage::disk($disk)->url($filePath),// URL to the saved QR code image
         ], 200);
+    }
+
+    ///////////////////////////////
+    public function getAllAttendance()
+    {
+        // التأكد من أن المستخدم له صلاحية المديرة أو المساعدة
+        if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
+            // الحصول على جميع سجلات الحضور
+            $attendances = AttendanceT::with('user')->whereHas('user', function ($query) {
+                $query->where('role_id', 3); // تأكد من أن المستخدمين هم معلمات
+            })->get();
+
+            return response()->json(['success' => true, 'attendances' => $attendances], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
+        }
     }
 }
 

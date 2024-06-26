@@ -53,7 +53,7 @@ class RecordOrderController extends Controller
 
         $record->accept = true;
         $record->save();
-
+        $record->delete();
         return response()->json(['message' => 'Successfully']);
     }
 

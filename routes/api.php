@@ -6,6 +6,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClassSupervisorController;
 use App\Http\Controllers\DisbursedInvoiceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\PermanentProgramController;
@@ -145,3 +146,9 @@ Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::clas
 /*الربح*/
 Route::get('calculate_Profit',[ProfitController::class,'calculateProfit'])->middleware('auth:api');
 Route::get('show_Profit_by_day',[ProfitController::class,'showProfit'])->middleware('auth:api');
+
+/*الوظيفة*/
+Route::post('create_homework',[HomeworkController::class,'store'])->middleware('auth:api');
+Route::post('update_homework/{id}',[HomeworkController::class,'update'])->middleware('auth:api');
+Route::get('get_homework/{id}',[HomeworkController::class,'show']);
+Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->middleware('auth:api');

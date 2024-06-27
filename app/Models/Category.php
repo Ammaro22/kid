@@ -22,6 +22,10 @@ class Category extends Model
         return $this->hasMany(Student::class,'category_id');
     }
 
+    public function homework(){
+        return $this->hasMany(Homework::class,'category_id');
+    }
+
     public function class_sav(){
         return $this->hasMany(Class_Supervisor::class,'category_id');
     }

@@ -41,6 +41,8 @@ return new class extends Migration
             $table->string('night_sleep_time');
             $table->string('relationship_with_strangers');
             $table->string('relationship_with_children');
+            $table->string('person_responsible_for_receiving');
+            $table->string('person_who_fills_the_form');
             $table->string('photo_family_book');
             $table->string('photo_father_page');
             $table->string('photo_mother_page');

@@ -175,20 +175,7 @@ class InvoiceController extends Controller
         ]);
     }
 
-//    public function getInvoicesByStudent()
-//    {
-//        $user = auth()->user();
-//        $students = $user->Student()->with('invoice')->get();
-//
-//        $invoicesByStudent = $students->mapWithKeys(function ($student) {
-//            return [$student->name => $student->invoice];
-//        });
-//
-//        return response()->json([
-//            'status' => true,
-//            'students' => $invoicesByStudent
-//        ]);
-//    }
+
 
     public function getInvoicesByStudent()
     {

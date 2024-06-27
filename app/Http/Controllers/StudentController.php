@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Storage;
 class StudentController extends Controller
 {
 
-
     public function store(Request $request)
     {
         $user = auth()->user();
@@ -52,6 +51,8 @@ class StudentController extends Controller
             'night_sleep_time' => 'required',
             'relationship_with_strangers' => 'required',
             'relationship_with_children' => 'required',
+            'person_responsible_for_receiving' => 'required',
+            'person_who_fills_the_form' => 'required',
             'photo_family_book' => 'required',
             'photo_father_page' => 'required',
             'photo_mother_page' => 'required',
@@ -95,11 +96,10 @@ class StudentController extends Controller
         }
 
         return response()->json([
-            'message' => 'تم تسجيل معلومات الطالب بنجاح',
+            'message' => 'Student information successfully registered',
             'student' => $student
         ]);
     }
-
 
     public function update(Request $request, $id)
     {
@@ -138,6 +138,8 @@ class StudentController extends Controller
             'night_sleep_time',
             'relationship_with_strangers',
             'relationship_with_children',
+            'person_responsible_for_receiving',
+            'person_who_fills_the_form',
             'category_id',
         ]));
 
@@ -181,7 +183,7 @@ class StudentController extends Controller
         }
 
         return response()->json([
-            'message' => 'تم تحديث معلومات الطالب بنجاح',
+            'message' => 'Student information has been successfully updated',
             'student' => $student
         ]);
     }
@@ -227,6 +229,8 @@ class StudentController extends Controller
             'night_sleep_time' => $student->night_sleep_time,
             'relationship_with_strangers' => $student->relationship_with_strangers,
             'relationship_with_children' => $student->relationship_with_children,
+            'person_responsible_for_receiving' => $student->person_responsible_for_receiving,
+            'person_who_fills_the_form' => $student->person_who_fills_the_form,
             'photo_family_book' => $student->photo_family_book,
             'photo_father_page' => $student->photo_father_page,
             'photo_mother_page' => $student->photo_mother_page,
@@ -236,15 +240,14 @@ class StudentController extends Controller
             'photo_vaccine_card' => $student->photo_vaccine_card,
             'category_id' => $student->category_id,
             'user_name' => $name_user,
-            'created_at' => $student->created_at,
-            'updated_at' => $student->updated_at,
+            'date' => $student->created_at->format('Y-m-d'),
+
         ];
         $images = Image_child::where('student_id', $id)->get();
         return response()->json(['studentData'=>$studentData,
             'images' => $images],
         200);
     }
-
 
     public function showStudentsbycategory($categoryId)
     {
@@ -266,6 +269,10 @@ class StudentController extends Controller
             $studentData = [
                 'id' => $student->id,
                 'name' => $student->name,
+                'gender'=>$student->gender,
+                'name_mother'=>$student->name_mother,
+                'name_father'=>$student->name_father,
+                'date_birth'=>$student->date_birth,
                 'user_name' => $nameUser,
                 'category_id' => $student->category_id,
                 'images' => $studentImages->map(function ($image) {
@@ -362,11 +369,13 @@ class StudentController extends Controller
                 'photo_child_page' => $student->photo_child_page,
                 'photo_father_identity' => $student->photo_father_identity,
                 'photo_mother_identity' => $student->photo_mother_identity,
+                'person_responsible_for_receiving' => $student->person_responsible_for_receiving,
+                'person_who_fills_the_form' => $student->person_who_fills_the_form,
                 'photo_vaccine_card' => $student->photo_vaccine_card,
                 'category_name' => $student->category->name,
                 'user_name' => $student->User->first_name . ' ' . $student->User->last_name,
-                'created_at' => $student->created_at,
-                'updated_at' => $student->updated_at
+                'date' => $student->created_at->format('Y-m-d'),
+
             ];
         }
         $student_id = $searchResults[0]['id'];
@@ -377,7 +386,6 @@ class StudentController extends Controller
             'images'=>$images
         ], 200);
     }
-
 
     /*عرض معلومات الطفل لاهله*/
     public function showStudentforparent(Request $request)
@@ -423,6 +431,8 @@ class StudentController extends Controller
             'night_sleep_time' => $student->night_sleep_time,
             'relationship_with_strangers' => $student->relationship_with_strangers,
             'relationship_with_children' => $student->relationship_with_children,
+            'person_responsible_for_receiving' => $student->person_responsible_for_receiving,
+            'person_who_fills_the_form' => $student->person_who_fills_the_form,
             'photo_family_book' => $student->photo_family_book,
             'photo_father_page' => $student->photo_father_page,
             'photo_mother_page' => $student->photo_mother_page,
@@ -432,12 +442,13 @@ class StudentController extends Controller
             'photo_vaccine_card' => $student->photo_vaccine_card,
             'category_id' => $student->category_id,
             'user_name' => $name_user,
-            'created_at' => $student->created_at,
-            'updated_at' => $student->updated_at,
+            'date' => $student->created_at->format('Y-m-d'),
+
         ];
 
         $images = Image_child::where('student_id', $student->id)->get();
 
         return response()->json(['studentData' => $studentData, 'images' => $images], 200);
     }
+
 }

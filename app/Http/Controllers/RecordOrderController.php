@@ -74,7 +74,6 @@ class RecordOrderController extends Controller
 
         $student = $record->stud();
         $student->delete();
-
         $record->delete();
 
         return response()->json([
@@ -172,7 +171,7 @@ class RecordOrderController extends Controller
             'photo_mother_identity' => $student->photo_mother_identity,
             'photo_vaccine_card' => $student->photo_vaccine_card,
             'category_name' => $categoryName,
-            'created_at' => $record->created_at,
+            'date' => $record->created_at->format('Y-m-d'),
             'images' => $studentImages->map(function ($image) {
                 return [
                     'id' => $image->id,
@@ -186,4 +185,5 @@ class RecordOrderController extends Controller
             'record' => $recordData,
         ], 200);
     }
+
 }

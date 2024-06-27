@@ -41,6 +41,8 @@ class Student extends Model
         'night_sleep_time',
         'relationship_with_strangers',
         'relationship_with_children',
+        'person_responsible_for_receiving',
+        'person_who_fills_the_form',
         'photo_family_book',
         'photo_father_page',
         'photo_mother_page',

@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
-
     public function store(Request $request)
     {
         $user = auth()->user();

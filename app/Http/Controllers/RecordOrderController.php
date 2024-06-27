@@ -53,7 +53,6 @@ class RecordOrderController extends Controller
 
         $record->accept = true;
         $record->save();
-        $record->delete();
         return response()->json(['message' => 'Successfully']);
     }
 
@@ -82,13 +81,44 @@ class RecordOrderController extends Controller
         ]);
     }
 
+//    public function showAllRecords()
+//    {
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 1 && $userRole !== 2) {
+//            return response()->json(['message' => 'Unauthorized'], 401);
+//        }
+//        $records = Record_order::all();
+//
+//        $recordsData = [];
+//        foreach ($records as $record) {
+//            $student = Student::find($record->student_id);
+//            $studentName = $student ? $student->name : 'Unknown';
+//
+//            $category = Category::find($student->category_id);
+//            $categoryName = $category ? $category->name : 'Unknown';
+//
+//            $recordData = [
+//                'id' => $record->id,
+//                'student_name' => $studentName,
+//                'category_name' => $categoryName,
+//                'created_at' => $record->created_at,
+//            ];
+//
+//            $recordsData[] = $recordData;
+//        }
+//
+//        return response()->json([
+//            'records' => $recordsData,
+//        ], 200);
+//    }
     public function showAllRecords()
     {
         $userRole = auth()->user()->role_id;
         if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $records = Record_order::all();
+
+        $records = Record_order::where('accept', 0)->get();
 
         $recordsData = [];
         foreach ($records as $record) {

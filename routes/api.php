@@ -45,7 +45,7 @@ Route::post('show_techer/{id}',[UserController::class,'getteacherbyid'])->middle
 /*تحديد مشرف الصف*/
 Route::post('select_name_teacher',[ClassSupervisorController::class,'storeClassSupervisor'])->middleware('auth:api');
 Route::post('update_name_teacher/{id}',[ClassSupervisorController::class,'updateClassSupervisor'])->middleware('auth:api');
-Route::post('show_supervisor',[ClassSupervisorController::class,'getClassSupervisor']);
+Route::post('show_supervisor',[ClassSupervisorController::class,'getClassBySupervisorId']);
 Route::delete('delete_class_supervisor/{id}',[ClassSupervisorController::class,'deleteClassSupervisor']);
 /*الطالب*/
 Route::post('student_registration',[StudentController::class,'store'])->middleware('auth:api');

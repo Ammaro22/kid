@@ -335,10 +335,11 @@ class StudentController extends Controller
             $searchResults[] = [
                 'id' => $student->id,
                 'name' => $student->name,
+                'date_birth' => $student->date_birth,
                 'gender' => $student->gender,
+                'name_father' => $student->name_father,
+                'name_mother' => $student->name_mother,
                 'category_name' => $student->category->name,
-                'user_name' => $student->User->first_name . ' ' . $student->User->last_name,
-                'date' => $student->created_at->format('Y-m-d'),
 
             ];
         }

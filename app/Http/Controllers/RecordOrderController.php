@@ -81,36 +81,7 @@ class RecordOrderController extends Controller
         ]);
     }
 
-//    public function showAllRecords()
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 1 && $userRole !== 2) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//        $records = Record_order::all();
-//
-//        $recordsData = [];
-//        foreach ($records as $record) {
-//            $student = Student::find($record->student_id);
-//            $studentName = $student ? $student->name : 'Unknown';
-//
-//            $category = Category::find($student->category_id);
-//            $categoryName = $category ? $category->name : 'Unknown';
-//
-//            $recordData = [
-//                'id' => $record->id,
-//                'student_name' => $studentName,
-//                'category_name' => $categoryName,
-//                'created_at' => $record->created_at,
-//            ];
-//
-//            $recordsData[] = $recordData;
-//        }
-//
-//        return response()->json([
-//            'records' => $recordsData,
-//        ], 200);
-//    }
+
     public function showAllRecords()
     {
         $userRole = auth()->user()->role_id;
@@ -193,6 +164,8 @@ class RecordOrderController extends Controller
             'night_sleep_time' => $student->night_sleep_time,
             'relationship_with_strangers' => $student->relationship_with_strangers,
             'relationship_with_children' => $student->relationship_with_children,
+            'person_responsible_for_receiving' => $student->person_responsible_for_receiving,
+            'person_who_fills_the_form' => $student->person_who_fills_the_form,
             'photo_family_book' => $student->photo_family_book,
             'photo_father_page' => $student->photo_father_page,
             'photo_mother_page' => $student->photo_mother_page,

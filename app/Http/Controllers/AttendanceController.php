@@ -11,32 +11,61 @@ use chillerlan\QRCode\QROptions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
 {
     ////////////اضافة حالة حضور الطالب//////////////////////
+
     public function add(Request $request)
     {
-        if (Auth::check()) {
-            if (Auth::user()->role_id == 3) {
-                $attendance = new Attendance ();
-                $attendance->user_id = Auth::id();
-                $attendance->student_id = $request->input('student_id');
-                $attendance->the_date = $request->input('the_date');
-                $attendance->status = $request->input('status');
-                $result = $attendance->save();
-                if ($result) {
-                    return response()->json(['message' => 'add Successfully'], 200);
-                } else {
-                    return response()->json(['message' => 'Error'], 404);
-                }
-            }
+        // التحقق من أن المستخدم مصرح له
+        if (!Auth::check()) {
+            return response()->json(['message' => 'You are not authorized to do this'], 403);
         }
-        return response()->json(['message' => 'you are not authorized to do this'], 403);
+
+        // التحقق من أن المستخدم لديه الصلاحيات المناسبة
+        if (Auth::user()->role_id != 3) {
+            return response()->json(['message' => 'You are not authorized to do this'], 403);
+        }
+
+        // استخراج البيانات من الطلب
+        $theDate = $request->input('the_date');
+        $students = $request->input('students');
+
+        // التحقق من وجود الحقول المطلوبة
+        if (!$theDate || !is_array($students) || empty($students)) {
+            return response()->json(['message' => 'Invalid data provided'], 400);
+        }
+
+        $attendance = [];
+        foreach ($students as $student) {
+            if (!isset($student['student_id']) || !isset($student['state'])) {
+                return response()->json(['message' => 'Invalid data provided for student'], 400);
+            }
+
+            $attendance[] = [
+                'user_id' => Auth::id(),
+                'student_id' => $student['student_id'],
+                'the_date' => $theDate,
+                'status' => $student['state'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+
+        // إدخال بيانات الحضور في الجدول
+        Attendance::insert($attendance);
+
+        // إرجاع رد نجاح
+        return response()->json(['message' => 'Attendance updated successfully'], 200);
     }
 
+
+
     //////////////////عرض حالة حضور الطالب من قبل المديرة و الأهل ///////////////
+
     public function checkStudentAttendanceStatus($id)
     {
         if (Auth::check()) {
@@ -55,6 +84,7 @@ class AttendanceController extends Controller
     }
 
     /* عرض حضور الطالب بالنسبة لاهله*/
+
     public function checkStudentAttendanceStatusforparent()
     {
         if (Auth::check()) {
@@ -79,7 +109,8 @@ class AttendanceController extends Controller
 
 
 
-    /////////////////////////////////////////////////////////
+    ///////////////////////////////
+
     public function makeAttendance()
     {
         if (Auth::user()->role_id == 3) {
@@ -95,7 +126,8 @@ class AttendanceController extends Controller
         }
     }
 
-    //////////////////////
+    ///////////////////////////////
+
     public function generateQrCode()
     {
 
@@ -131,6 +163,7 @@ class AttendanceController extends Controller
     }
 
     ///////////////////////////////
+
     public function getAllAttendance()
     {
         // التأكد من أن المستخدم له صلاحية المديرة أو المساعدة
@@ -145,5 +178,6 @@ class AttendanceController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
         }
     }
+
 }
 

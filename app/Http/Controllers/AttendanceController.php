@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Image_child;
 use App\Models\Student;
 use Carbon\Carbon;
 use App\Models\Attendance;
@@ -165,7 +166,7 @@ class AttendanceController extends Controller
 
     /* عرض حضور الطالب بالنسبة لاهله*/
 
-    public function getmyStudentAttendanceHistoryf(Request $request)
+    public function getmyStudentAttendanceHistoryday(Request $request)
     {
         try {
             $user = $request->user();
@@ -187,6 +188,7 @@ class AttendanceController extends Controller
                 return response()->json(['message' => 'No attendance records found for the given student and date.'], 404);
             }
 
+
             $attendanceHistory = $attendance->map(function ($record) {
                 return [
                     'the_date' => $record->the_date,
@@ -197,6 +199,71 @@ class AttendanceController extends Controller
             $studentData = [
                 'name' => $student->name,
                 'category_name' => $student->category->name,
+                'images' => $student->image_c()->get()->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'name'=>$image->name,
+                        'path' => $image->path, ]; }),
+            ];
+
+            return response()->json([
+                'student' => $studentData,
+                'student_attendance_history' => $attendanceHistory
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching student attendance history.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function getmyStudentAttendanceHistorymonth(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $studentName = $request->input('student_name');
+            $theDate = $request->input('the_date');
+
+            if (!$theDate) {
+                return response()->json(['message' => 'Please provide a valid date.'], 400);
+            }
+
+            try {
+                $date = Carbon::parse($theDate);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Please provide a valid date in the format YYYY-MM.'], 400);
+            }
+
+            $student = $user->Student()->where('name', 'like', "%$studentName%")
+                ->first();
+
+            if (!$student) {
+                return response()->json(['message' => 'No student record found for the given student name.'], 404);
+            }
+
+            $attendance = $student->attendance()
+                ->whereMonth('the_date', '=', $date->month)
+                ->whereYear('the_date', '=', $date->year)
+                ->get();
+
+            if ($attendance->isEmpty()) {
+                return response()->json(['message' => 'No attendance records found for the given student and date.'], 404);
+            }
+
+            $attendanceHistory = $attendance->map(function ($record) {
+                return [
+                    'the_date' => Carbon::parse($record->the_date)->format('Y-m'),
+                    'status' => $record->status,
+                ];
+            });
+
+            $studentData = [
+                'name' => $student->name,
+                'category_name' => $student->category->name,
+                'images' => $student->image_c()->get()->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'name'=>$image->name,
+                        'path' => $image->path, ]; }),
             ];
 
             return response()->json([

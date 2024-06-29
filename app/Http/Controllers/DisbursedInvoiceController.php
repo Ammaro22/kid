@@ -138,6 +138,7 @@ class DisbursedInvoiceController extends Controller
             'total_price' => $totalPrice,
         ], 200);
     }
+
     public function getTotalPrice()
     {
 
@@ -153,6 +154,7 @@ class DisbursedInvoiceController extends Controller
             'total_price' => $totalPrice,
         ], 200);
     }
+
     public function deleteDisbursedInvoice($id)
     {
 

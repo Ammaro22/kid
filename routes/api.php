@@ -44,7 +44,7 @@ Route::post('show_all_techer',[UserController::class,'getallteacher'])->middlewa
 Route::post('show_techer/{id}',[UserController::class,'getteacherbyid'])->middleware('auth:api');
 /*تحديد مشرف الصف*/
 Route::post('select_name_teacher',[ClassSupervisorController::class,'storeClassSupervisor'])->middleware('auth:api');
-Route::post('update_name_teacher/{id}',[ClassSupervisorController::class,'updateClassSupervisor'])->middleware('auth:api');
+Route::post('update_name_teacher',[ClassSupervisorController::class,'updateClassSupervisor'])->middleware('auth:api');
 Route::post('show_supervisor',[ClassSupervisorController::class,'getClassBySupervisorId']);
 Route::delete('delete_class_supervisor/{id}',[ClassSupervisorController::class,'deleteClassSupervisor']);
 /*الطالب*/
@@ -147,6 +147,7 @@ Route::get('show_all_disbursed_invoices',[DisbursedInvoiceController::class,'get
 Route::get('get_total__price_disbursed_invoices_by_invoice_type/{id}',[DisbursedInvoiceController::class,'getTotalPriceByInvoiceType'])->middleware('auth:api');
 Route::get('get_total__price_disbursed_invoices',[DisbursedInvoiceController::class,'getTotalPrice'])->middleware('auth:api');
 Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::class,'deleteDisbursedInvoice'])->middleware('auth:api');
+
 /*الربح*/
 Route::get('calculate_Profit',[ProfitController::class,'calculateProfit'])->middleware('auth:api');
 Route::get('show_Profit_by_day',[ProfitController::class,'showProfit'])->middleware('auth:api');

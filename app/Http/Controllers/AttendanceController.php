@@ -275,6 +275,11 @@ class AttendanceController extends Controller
         }
     }
 
+
+
+
+
+
     ////////////////////////////////المعلمات////////////////////////////////
 
     public function makeAttendance()
@@ -288,7 +293,7 @@ class AttendanceController extends Controller
             return response()->json(['success' => true, 'message' => 'Attendance marked successfully.'], 201);
         }
         else{
-            return response()->json(['error' => true, 'message' => 'you are not authorized to do this'], 201);
+            return response()->json(['error' => false, 'message' => 'you are not authorized to do this'], 201);
         }
     }
 
@@ -320,11 +325,11 @@ class AttendanceController extends Controller
         $disk = 'public';
         $filePath = 'qr/' . time() . '.png';
 
-        // Store the file using Laravel's Storage facade
+
         Storage::disk($disk)->put($filePath, $qrOutputInterface);
 
         return response()->json([
-            'qr_code_path' => Storage::disk($disk)->url($filePath),// URL to the saved QR code image
+            'qr_code_path' => Storage::disk($disk)->url($filePath),
         ], 200);
     }
 
@@ -332,11 +337,10 @@ class AttendanceController extends Controller
 
     public function getAllAttendance()
     {
-        // التأكد من أن المستخدم له صلاحية المديرة أو المساعدة
+
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
-            // الحصول على جميع سجلات الحضور
             $attendances = AttendanceT::with('user')->whereHas('user', function ($query) {
-                $query->where('role_id', 3); // تأكد من أن المستخدمين هم معلمات
+                $query->where('role_id', 3);
             })->get();
 
             return response()->json(['success' => true, 'attendances' => $attendances], 200);

@@ -126,9 +126,11 @@ Route::post('update_note_sudent/{id}',[NoteController::class,'updateNoteAdmin'])
 
 //////////////////حضور الطلاب/////////////////
 Route::post('add_attendance',[AttendanceController::class,'add'])->middleware('auth:api');
-Route::get('students_attendance_status/{id}',[AttendanceController::class,'checkStudentAttendanceStatus'])->middleware('auth:api');
+Route::get('show_attendance_status_all_student',[AttendanceController::class,'getAllStudentAttendance'])->middleware('auth:api');
+Route::get('show_attendance_status_for_student/{id}',[AttendanceController::class,'getStudentAttendance'])->middleware('auth:api');
+Route::get('get_Student_Attendance_History/{id}',[AttendanceController::class,'getStudentAttendanceHistory'])->middleware('auth:api');
 /*عرض حضور الطالب لاهله*/
-Route::get('students_attendance_status_for_parent',[AttendanceController::class,'checkStudentAttendanceStatusforparent'])->middleware('auth:api');
+Route::get('get_Student_Attendance_History_for_parent_by_day',[AttendanceController::class,'getmyStudentAttendanceHistoryf'])->middleware('auth:api');
 //////////////////حضور المعلمات/////////////////
 Route::get('make-attendance',[AttendanceController::class,'makeAttendance'])->middleware('auth:api')->name('mark-attendance');
 Route::get('generate_qr_code', [AttendanceController::class, 'generateQrCode'])->middleware('auth:api');

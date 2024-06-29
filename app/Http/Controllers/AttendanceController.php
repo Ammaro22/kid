@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Student;
 use Carbon\Carbon;
 use App\Models\Attendance;
 use App\Models\AttendanceT;
@@ -16,100 +17,198 @@ use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
 {
-    ////////////اضافة حالة حضور الطالب//////////////////////
+    ///////////////////// حضور الطالب//////////////////////
+
+
 
     public function add(Request $request)
     {
-        // التحقق من أن المستخدم مصرح له
+
         if (!Auth::check()) {
             return response()->json(['message' => 'You are not authorized to do this'], 403);
         }
 
-        // التحقق من أن المستخدم لديه الصلاحيات المناسبة
+
         if (Auth::user()->role_id != 3) {
             return response()->json(['message' => 'You are not authorized to do this'], 403);
         }
 
-        // استخراج البيانات من الطلب
-        $theDate = $request->input('the_date');
-        $students = $request->input('students');
 
-        // التحقق من وجود الحقول المطلوبة
-        if (!$theDate || !is_array($students) || empty($students)) {
-            return response()->json(['message' => 'Invalid data provided'], 400);
-        }
+        $validatedData = $request->validate([
+            'attendance' => 'required|array|min:1',
+            'attendance.*.student_id' => 'required|integer|exists:students,id',
+            'attendance.*.status' => 'required|in:Present,Absent',
+        ]);
 
         $attendance = [];
-        foreach ($students as $student) {
-            if (!isset($student['student_id']) || !isset($student['state'])) {
-                return response()->json(['message' => 'Invalid data provided for student'], 400);
-            }
 
+
+
+        foreach ($validatedData['attendance'] as $attendanceItem) {
             $attendance[] = [
                 'user_id' => Auth::id(),
-                'student_id' => $student['student_id'],
-                'the_date' => $theDate,
-                'status' => $student['state'],
-                'created_at' => now(),
-                'updated_at' => now()
+                'student_id' => $attendanceItem['student_id'],
+                'the_date' => now(),
+                'status' => $attendanceItem['status'],
             ];
         }
 
-        // إدخال بيانات الحضور في الجدول
+
         Attendance::insert($attendance);
 
-        // إرجاع رد نجاح
+
         return response()->json(['message' => 'Attendance updated successfully'], 200);
     }
 
-
-
-    //////////////////عرض حالة حضور الطالب من قبل المديرة و الأهل ///////////////
-
-    public function checkStudentAttendanceStatus($id)
+    public function getAllStudentAttendance(Request $request)
     {
-        if (Auth::check()) {
-            if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2   ) {
-                $attendance = Attendance::where('student_id', $id)
-                    ->whereDate('the_date', Carbon::today())
-                    ->first();
-                if ($attendance) {
-                    return response()->json(['message' => 'Successfully retrieved attendance status', 'status' => $attendance->status], 200);
-                } else {
-                    return response()->json(['message' => 'No attendance record found for the student on the current day'], 404);
-                }
-            }
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-        return response()->json(['message' => 'You are not authorized to perform this action'], 403);
+        try {
+            $theDate = now()->toDateString();
+
+            $attendances = Attendance::whereDate('the_date', $theDate)
+                ->with('student')
+                ->get();
+
+            if ($attendances->isEmpty()) {
+                return response()->json(['message' => 'No attendance records found for the current date.'], 404);
+            }
+
+            $studentAttendance = $attendances->map(function ($attendance) {
+                $student = $attendance->student;
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'category_name' => $student->category->name,
+                    'status' => $attendance->status,
+                ];
+            });
+
+            return response()->json(['students'=>[$studentAttendance]]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching student attendance.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getStudentAttendance(Request $request, $student_id)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        try {
+            $theDate = now()->toDateString();
+
+            $attendance = Attendance::whereDate('the_date', $theDate)
+                ->where('student_id', $student_id)
+                ->with('student', 'student.category')
+                ->first();
+
+            if (!$attendance) {
+                return response()->json(['message' => 'No attendance record found for the given student on the current date.'], 404);
+            }
+
+            $student = $attendance->student;
+            $data = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'category_name' => $student->category->name,
+                'status' => $attendance->status,
+            ];
+
+            return response()->json(['student'=>[$data]]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching student attendance.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getStudentAttendanceHistory(Request $request, $student_id)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        try {
+            $attendance = Attendance::where('student_id', $student_id)
+                ->with('student', 'student.category')
+                ->get();
+
+            if ($attendance->isEmpty()) {
+                return response()->json(['message' => 'No attendance records found for the given student.'], 404);
+            }
+
+            $student = $attendance->first()->student;
+            $studentData = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'category_name' => $student->category->name,
+            ];
+
+            $attendanceHistory = $attendance->map(function ($record) {
+                return [
+                    'the_date' => $record->the_date,
+                    'status' => $record->status,
+                ];
+            });
+
+            return response()->json([
+                'student' => $studentData,
+                'student_attendance_history' => $attendanceHistory
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching student attendance history.', 'error' => $e->getMessage()], 500);
+        }
     }
 
     /* عرض حضور الطالب بالنسبة لاهله*/
 
-    public function checkStudentAttendanceStatusforparent()
+    public function getmyStudentAttendanceHistoryf(Request $request)
     {
-        if (Auth::check()) {
-            if (Auth::user()->role_id == 4) {
-        $user = auth()->user();
-        $student = $user->Student;
+        try {
+            $user = $request->user();
+            $studentName = $request->input('student_name');
+            $theDate = $request->input('the_date');
 
-        if ($student) {
-            $attendance = Attendance::where('student_id', $student->id)
-                ->whereDate('the_date', Carbon::today())
+            $student = $user->Student()->where('name', 'like', "%$studentName%")
                 ->first();
 
-            if ($attendance) {
-                return response()->json(['message' => 'Successfully retrieved attendance status', 'status' => $attendance->status], 200);
-            } else {
-                return response()->json(['message' => 'No attendance record found for the student on the current day'], 404);
+            if (!$student) {
+                return response()->json(['message' => 'No student record found for the given student name.'], 404);
             }
-        } else {
-            return response()->json(['message' => 'The authenticated user is not associated with a student'], 404);
+
+            $attendance = $student->attendance()
+                ->where('the_date', $theDate)
+                ->get();
+
+            if ($attendance->isEmpty()) {
+                return response()->json(['message' => 'No attendance records found for the given student and date.'], 404);
+            }
+
+            $attendanceHistory = $attendance->map(function ($record) {
+                return [
+                    'the_date' => $record->the_date,
+                    'status' => $record->status,
+                ];
+            });
+
+            $studentData = [
+                'name' => $student->name,
+                'category_name' => $student->category->name,
+            ];
+
+            return response()->json([
+                'student' => $studentData,
+                'student_attendance_history' => $attendanceHistory
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching student attendance history.', 'error' => $e->getMessage()], 500);
         }
-    }}}
+    }
 
-
-
-    ///////////////////////////////
+    ////////////////////////////////المعلمات////////////////////////////////
 
     public function makeAttendance()
     {

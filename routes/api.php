@@ -134,11 +134,13 @@ Route::get('get_Student_Attendance_History_for_parent_by_day',[AttendanceControl
 Route::get('get_Student_Attendance_History_for_parent_by_month',[AttendanceController::class,'getmyStudentAttendanceHistorymonth'])->middleware('auth:api');
 
 //////////////////حضور المعلمات/////////////////
-Route::get('make-attendance',[AttendanceController::class,'makeAttendance'])->middleware('auth:api')->name('mark-attendance');
+Route::get('make_attendance_for_teacher',[AttendanceController::class,'readQrCode'])->middleware('auth:api');
 Route::get('generate_qr_code', [AttendanceController::class, 'generateQrCode'])->middleware('auth:api');
 ////////////////// عرض حضور الخاص بالمديرة/////////////////
 Route::get('get_all_attendance', [AttendanceController::class, 'getAllAttendance'])->middleware('auth:api');
-
+Route::get('get_all_attendance_for_teacher_by_date', [AttendanceController::class, 'getAllAttendancforteacherbydate'])->middleware('auth:api');
+/*استلام الصورة من QR حسب الاسم*/
+Route::post('qr-image', [AttendanceController::class, 'getQrImage']);
 /*السجلات المالية*/
 Route::post('disbursed_invoices',[DisbursedInvoiceController::class,'createDisbursedInvoice'])->middleware('auth:api');
 Route::post('update_disbursed_invoices/{id}',[DisbursedInvoiceController::class,'updateDisbursedInvoice'])->middleware('auth:api');

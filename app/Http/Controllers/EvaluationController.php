@@ -42,7 +42,6 @@ class EvaluationController extends Controller
         foreach ($subjects as $subject) {
             $subjectName = $subject['name'];
             $evaluationValue = $subject['evaluation'];
-
             $subjectModel = Subject::where('name', $subjectName)->first();
 
             if (!$subjectModel) {
@@ -136,25 +135,59 @@ class EvaluationController extends Controller
     }
 
 
+//    public function showEvaluations(Request $request, $studentId)
+//    {
+//
+//        $day = $request->input('day');
+//        $month = $request->input('month');
+//        $year = $request->input('year');
+//
+//
+//        $student = Student::findOrFail($studentId);
+//        $evaluations = $student->evaluation1;
+//        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($day ,$month , $year) {
+//            return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+//        });
+//        $noteIds = $filteredEvaluations->pluck('note_id');
+//        $notes = Note::whereIn('id', $noteIds)->get();
+//        $output = [
+//            'evaluation' => $filteredEvaluations->toArray(),
+//            'note_teacher' => $notes->toArray(),
+//
+//        ];
+//
+//        if ($filteredEvaluations->isNotEmpty()) {
+//            return response()->json($output);
+//        } else {
+//            return response()->json(['message' => 'evaluation not found'], 404);
+//        }
+//    }
+
     public function showEvaluations(Request $request, $studentId)
     {
-
         $day = $request->input('day');
         $month = $request->input('month');
         $year = $request->input('year');
 
-
         $student = Student::findOrFail($studentId);
         $evaluations = $student->evaluation1;
-        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($day ,$month , $year) {
+        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($day, $month, $year) {
             return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
         });
+
         $noteIds = $filteredEvaluations->pluck('note_id');
         $notes = Note::whereIn('id', $noteIds)->get();
-        $output = [
-            'evaluation' => $filteredEvaluations->toArray(),
-            'note_teacher' => $notes->toArray(),
 
+        $output = [
+            'evaluation' => $filteredEvaluations->map(function ($evaluation) {
+                return [
+                    'id' => $evaluation->id,
+                    'subject' => $evaluation->subject1->name,
+                    'evaluation'=>$evaluation->evaluation,
+                    'created_at' => $evaluation->created_at->format('Y-m-d H:i:s'),
+                ];
+            })->toArray(),
+            'note_teacher' => $notes->toArray(),
         ];
 
         if ($filteredEvaluations->isNotEmpty()) {
@@ -164,32 +197,60 @@ class EvaluationController extends Controller
         }
     }
 
+//    public function showEvaluationsmonth(Request $request, $studentId)
+//    {
+//
+//        $month = $request->input('month');
+//        $year = $request->input('year');
+//
+//        $student = Student::findOrFail($studentId);
+//        $evaluations = $student->evaluation1;
+//        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($month , $year) {
+//            return $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+//        });
+//        $noteIds = $filteredEvaluations->pluck('note_id');
+//        $notes = Note::whereIn('id', $noteIds)->get();
+//        $output = [
+//            'evaluation' => $filteredEvaluations->toArray(),
+//            'note_teacher' => $notes->toArray(),
+//
+//        ];
+//
+//        if ($filteredEvaluations->isNotEmpty()) {
+//            return response()->json($output);
+//        } else {
+//            return response()->json(['message' => 'evaluation not found'], 404);
+//        }
+//    }
+
     public function showEvaluationsmonth(Request $request, $studentId)
     {
-
         $month = $request->input('month');
         $year = $request->input('year');
 
         $student = Student::findOrFail($studentId);
         $evaluations = $student->evaluation1;
-        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($month , $year) {
+
+        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($month, $year) {
             return $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
         });
-        $noteIds = $filteredEvaluations->pluck('note_id');
-        $notes = Note::whereIn('id', $noteIds)->get();
-        $output = [
-            'evaluation' => $filteredEvaluations->toArray(),
-            'note_teacher' => $notes->toArray(),
 
-        ];
+        $days = $filteredEvaluations->groupBy(function ($evaluation) {
+            return $evaluation->created_at->format('Y-m-d');
+        })->map(function ($group, $date) {
+            return  [
+                'date' => $date,
+            ];
+        })->values()->toArray();
 
         if ($filteredEvaluations->isNotEmpty()) {
-            return response()->json($output);
+            return response()->json(['days' => $days]);
         } else {
-            return response()->json(['message' => 'evaluation not found'], 404);
+            return response()->json([
+                'message' => 'No evaluations found for the given month and year'
+            ], 404);
         }
     }
-
 
 
     public function getEvaluationsByCategoryId($categoryId)

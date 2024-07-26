@@ -238,8 +238,11 @@ class EvaluationController extends Controller
         $days = $filteredEvaluations->groupBy(function ($evaluation) {
             return $evaluation->created_at->format('Y-m-d');
         })->map(function ($group, $date) {
-            return  [
-                'date' => $date,
+            $dateObject = \Carbon\Carbon::createFromFormat('Y-m-d', $date);
+            return [
+                'day' => $dateObject->format('d'),
+                'month' => $dateObject->format('m'),
+                'year' => $dateObject->format('Y')
             ];
         })->values()->toArray();
 

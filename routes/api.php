@@ -73,7 +73,7 @@ Route::post('get_invoices_by_category/{id}', [InvoiceController::class, 'getStud
 Route::get('get_total_invoices_for_category', [InvoiceController::class, 'getTotalInvoicesByCategory'])->middleware('auth:api');
 
 /*فواتير الابناء بالنسة للاهل*/
-Route::get('get_invoices_for_parent',[InvoiceController::class,'getInvoicesByStudent'])->middleware('auth:api');
+Route::get('get_invoices_for_parent/{id}',[InvoiceController::class,'getInvoicesByStudent'])->middleware('auth:api');
 /*الاحداث*/
 
 Route::post('create_activity',[ActivityController::class,'create'])->middleware('auth:api');

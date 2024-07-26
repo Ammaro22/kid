@@ -177,24 +177,38 @@ class InvoiceController extends Controller
 
 
 
-    public function getInvoicesByStudent()
+    public function getInvoicesByStudent(Request $request, $student_id)
     {
         $user = auth()->user();
-        $students = $user->Student()->with('invoice', 'image_c')->get();
+        $student = $user->Student()->with('invoice', 'image_c')->where('id', $student_id)->first();
 
-        $invoicesByStudent = $students->mapWithKeys(function ($student) {
-            $studentImages = Image_child::where('student_id', $student->id)->get();
+        if (!$student) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Student not found.'
+            ], 404);
+        }
+
+        $studentImages = Image_child::where('student_id', $student->id)->get();
+
+        $invoices = $student->invoice->map(function ($invoice) {
             return [
-                $student->name => [
-                    'invoices' => $student->invoice,
-                    'images' => $studentImages
-                ]
+                'id' => $invoice->id,
+                'created_at' => $invoice->created_at->format('d/m/Y'),
+                'amount' => $invoice->batch,
+
             ];
         });
 
         return response()->json([
             'status' => true,
-            'students' => $invoicesByStudent
+            'student' => [
+                'id' => $student->id,
+                'name' => $student->name,
+                'category_name'=>$student->category->name,
+                'invoices' => $invoices,
+                'images' => $studentImages
+            ]
         ]);
     }
 

@@ -83,14 +83,14 @@ class HomeworkController extends Controller
         $month = $request->input('month');
         $year = $request->input('year');
 
-        $homework = Homework::where('category_id', $category_id)
+        $homeworks = Homework::where('category_id', $category_id)
             ->whereDay('created_at', $day)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->orderByDesc('created_at')
-            ->first();
+            ->get();
 
-        if (!$homework) {
+        if ($homeworks->isEmpty()) {
             return response()->json([
                 'status' => false,
                 'message' => 'No homeworks found for the specified day, month, and year.',
@@ -98,13 +98,15 @@ class HomeworkController extends Controller
             ], 404);
         }
 
-        $data = [
-            'day' => $homework->the_day,
-            'subject' => $homework->Subject,
-            'homework' => $homework->homework,
-            'category' => $category->name,
-            'date' => $homework->created_at->format('Y-m-d'),
-        ];
+        $data = $homeworks->map(function ($homework) use ($category) {
+            return [
+                'day' => $homework->the_day,
+                'subject' => $homework->Subject,
+                'homework' => $homework->homework,
+                'category' => $category->name,
+                'date' => $homework->created_at->format('Y-m-d'),
+            ];
+        });
 
         return response()->json([
             'status' => true,

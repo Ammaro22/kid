@@ -357,9 +357,25 @@ class StudentController extends Controller
     public function showStudentforparent(Request $request)
     {
         $userId = $request->user()->id;
-        $students = Student::where('user_id', $userId)->select('id', 'name')->get();
 
-        return response()->json(['students' => $students], 200);
+        $students = Student::where('user_id', $userId)
+            ->with('category')
+            ->select('id', 'name', 'category_id')
+            ->get();
+
+        $data = $students->map(function ($student) {
+            $images = Image_child::where('student_id', $student->id)->get();
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'category' => $student->category->name,
+                'images' => $images
+            ];
+        });
+
+        return response()->json([
+            'students' => $data
+        ], 200);
     }
 
 }

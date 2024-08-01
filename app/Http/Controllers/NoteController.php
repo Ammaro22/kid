@@ -14,7 +14,7 @@ class NoteController extends Controller
     public function updateNoteAdmin(Request $request,$studentId)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1 || $userRole !==2 ) {
+        if ($userRole !== 1 && $userRole !== 2 ) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         $idNote = $request->input('note_id');
@@ -27,6 +27,6 @@ class NoteController extends Controller
         $note->note_admin = $note_admin;
         $note->save();
 
-        return response()->json(['message' => 'تم تحديث ملاحظة المشرف بنجاح.']);
+        return response()->json(['message' => 'Admin note updated successfully']);
     }
 }

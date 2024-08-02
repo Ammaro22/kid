@@ -189,4 +189,49 @@ class RecordOrderController extends Controller
         ], 200);
     }
 
+    public function showRecords()
+    {
+
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 4) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+
+        $userId = auth()->user()->id;
+
+        $records = Record_order::with(['stud' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        }])
+            ->select('id', 'student_id', 'accept','created_at')
+            ->get();
+
+        $response = [];
+        foreach ($records as $record) {
+            if ($record->stud) {
+                $status = '';
+                if ($record->accept == 0) {
+                    $status = 'Not Accepted';
+                } elseif ($record->accept == 1) {
+                    $status = 'Accepted';
+                }
+                $response[] = [
+                    'id' => $record->id,
+                    'student_id' => $record->student_id,
+                    'student_name' => $record->stud->name,
+                    'status' => $status,
+                    'created_at' => $record->created_at->format('Y-m-d'),
+                ];
+            }
+        }
+
+        if (count($response) === 0) {
+            return response()->json([
+                'message' => 'Your request has been rejected'
+            ], 404);
+        }
+
+        return response()->json($response);
+    }
+
 }

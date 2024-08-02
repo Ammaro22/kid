@@ -21,8 +21,6 @@ class AttendanceController extends Controller
 {
     ///////////////////// حضور الطالب//////////////////////
 
-
-
     public function add(Request $request)
     {
 
@@ -252,7 +250,7 @@ class AttendanceController extends Controller
 
             $attendanceHistory = $attendance->map(function ($record) {
                 return [
-                    'the_date' => Carbon::parse($record->the_date)->format('Y-m'),
+                    'the_date' => Carbon::parse($record->the_date)->format('Y-m-d'),
                     'status' => $record->status,
                 ];
             });
@@ -276,231 +274,83 @@ class AttendanceController extends Controller
         }
     }
 
-
-
-
-
-
     ////////////////////////////////المعلمات////////////////////////////////
-
-    public function readQrCode(Request $request)
+    public function recordAttendance(Request $request)
     {
-        if (Auth::user()->role_id != 3) {
-            return response()->json(['message' => 'You are not authorized to do this'], 403);
-        }
-        $the_date = $request->input('the_date');
+        $userId = Auth::id();
 
-        AttendanceT::create([
-            'user_id' => Auth::id(),
-            'the_date' => $the_date,
-            'present' => true,
-        ]);
+        $attendance = new AttendanceT();
+        $attendance->user_id = $userId;
+        $attendance->the_date = now();
+        $attendance->present = 1; // Set present to 1 by default
+        $attendance->save();
 
         return response()->json([
-            'message' => 'Attendance recorded successfully.',
+            'message' => 'Attendance recorded successfully.'
         ], 200);
     }
-
-
-
-//    public function readQrCode(Request $request)
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 1 && $userRole !== 3) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//
-//        $qrCodePath = $request->input('qr_code_path');
-//        if (!$qrCodePath) {
-//            return response()->json(['message' => 'QR code path is required'], 400);
-//        }
-//
-//        $qrCodeDate = $this->getQrCodeDate($qrCodePath);
-//        if (!$qrCodeDate) {
-//            return response()->json(['message' => 'Invalid QR code'], 400);
-//        }
-//
-//        $attendanceDate = now()->format('Y-m-d');
-//        if ($qrCodeDate !== $attendanceDate) {
-//            return response()->json(['message' => 'QR code expired'], 400);
-//        }
-//
-//        $attendance = Attendance::where('user_id', auth()->id())
-//            ->where('date', $attendanceDate)
-//            ->first();
-//        if ($attendance) {
-//            return response()->json(['message' => 'Attendance already recorded'], 400);
-//        }
-//
-//        // Record attendance
-//        Attendance::create([
-//            'user_id' => auth()->id(),
-//            'date' => $attendanceDate,
-//        ]);
-//
-//        return response()->json(['message' => 'Attendance recorded'], 200);
-//    }
-//
-//    private function getQrCodeDate($qrCodePath)
-//    {
-//        $fileName = basename($qrCodePath);
-//        $datePrefix = 'qr_code_';
-//        $dateLength = 10;
-//
-//        if (stripos($fileName, $datePrefix) === 0) {
-//            $dateString = substr($fileName, strlen($datePrefix), $dateLength);
-//            try {
-//                return Carbon::createFromFormat('Ymd', $dateString)->toDateString();
-//            } catch (\Exception $e) {
-//                // If the date string is not in the expected format, return null
-//                return null;
-//            }
-//        }
-//
-//        return null;
-//    }
-
     ///////////////////////////////
 
-//    public function generateQrCode()
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 1 && $userRole !== 2) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//        $the_date = now()->format('Y-m-d');
-//        $options = new QROptions();
-//
-//        $options->version             = 9;
-//        $options->scale               = 6;
-//        $options->outputBase64        = false;
-//        $options->bgColor             = [200, 150, 200];
-//        $options->imageTransparent    = true;
-//        $options->keepAsSquare        = [
-//            QRMatrix::M_FINDER_DARK,
-//            QRMatrix::M_FINDER_DOT,
-//        ];
-//
-//        $options->addQuietzone    = true;
-//
-//        $qrcode = (new QRCode($options));
-//        $qrcode->addByteSegment($the_date);
-//        $qrOutputInterface = (new QRGdImagePNG($options, $qrcode->getQRMatrix()))->dump();
-//
-//        $disk = 'public';
-//        $filePath = 'qr/' . time() . '.png';
-//
-//        Storage::disk($disk)->put($filePath, $qrOutputInterface);
-//
-//        return response()->json([
-//            'qr_code_path' => Storage::disk($disk)->url($filePath),
-//        ], 200);
-//    }
 
 
-    public function generateQrCode()
+    public function getAllAttendanceForTeacherByMonth(Request $request)
     {
-        $userRole = auth()->user()->role_id;
-        if ($userRole !== 1 && $userRole !== 2) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        $the_date = now()->format('Y-m-d');
-        $filePath = 'qr/qr_code.png';
-
-
-        if (Storage::disk('public')->exists($filePath)) {
-
-            $this->updateQrCodeDate($filePath, $the_date);
-        } else {
-
-            $this->generateAndStoreQrCode($the_date, $filePath);
-        }
-
-        $publicUrl = Storage::disk('public')->url($filePath);
-        return response()->json(['qr_code_path' => $publicUrl], 200);
-    }
-
-    private function updateQrCodeDate($filePath, $the_date)
-    {
-        $options = new QROptions();
-        $options->version = 9;
-        $options->scale = 6;
-        $options->outputBase64 = false;
-        $options->bgColor = [200, 150, 200];
-        $options->imageTransparent = true;
-        $options->keepAsSquare = [
-            QRMatrix::M_FINDER_DARK,
-            QRMatrix::M_FINDER_DOT,
-        ];
-        $options->addQuietzone = true;
-
-        $qrcode = (new QRCode($options));
-        $qrcode->addByteSegment($the_date);
-        $qrOutputInterface = (new QRGdImagePNG($options, $qrcode->getQRMatrix()))->dump();
-
-        Storage::disk('public')->put($filePath, $qrOutputInterface);
-    }
-
-    private function generateAndStoreQrCode($the_date, $filePath)
-    {
-        $options = new QROptions();
-        $options->version = 9;
-        $options->scale = 6;
-        $options->outputBase64 = false;
-        $options->bgColor = [200, 150, 200];
-        $options->imageTransparent = true;
-        $options->keepAsSquare = [
-            QRMatrix::M_FINDER_DARK,
-            QRMatrix::M_FINDER_DOT,
-        ];
-        $options->addQuietzone = true;
-
-        $qrcode = (new QRCode($options));
-        $qrcode->addByteSegment($the_date);
-        $qrOutputInterface = (new QRGdImagePNG($options, $qrcode->getQRMatrix()))->dump();
-
-        Storage::disk('public')->put($filePath, $qrOutputInterface);
-    }
-    ///////////////////////////////
-
-    public function getAllAttendance()
-    {
-
-        if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
-            $attendances = AttendanceT::with('user')->whereHas('user', function ($query) {
-                $query->where('role_id', 3);
-            })->get();
-
-            return response()->json(['success' => true, 'attendances' => $attendances], 200);
-        } else {
+        if (Auth::user()->role_id != 1 && Auth::user()->role_id != 2) {
             return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
         }
+
+        $userId = $request->input('user_id');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+
+        $attendances = AttendanceT::with('user')
+            ->whereHas('user', function ($query) {
+                $query->where('role_id', 3);
+            })
+            ->whereBetween('the_date', [$startDate, $endDate])
+            ->when($userId, function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->get();
+
+        $attendancesData = $attendances->map(function ($attendance) {
+            return [
+                'id' => $attendance->id,
+                'the_date' => $attendance->the_date,
+                'present' => $attendance->present,
+            ];
+        });
+
+        if ($attendancesData->isEmpty()) {
+            return response()->json(['success' => true, 'message' => 'No attendance records found for the selected month.'], 200);
+        }
+
+        return response()->json(['success' => true, 'attendances' => $attendancesData], 200);
     }
 
-    public function getAllAttendancforteacherbydate(Request $request)
+    public function getAllAttendanceForTeacherByDate(Request $request)
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
-            $theDate = $request->input('the_date', date('Y-m-d'));
+            $theDate = now()->format('Y-m-d');
+            $userId = $request->input('user_id');
+
             $attendances = AttendanceT::with('user')
                 ->whereHas('user', function ($query) {
                     $query->where('role_id', 3);
                 })
                 ->whereDate('the_date', $theDate)
+                ->when($userId, function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                })
                 ->get()
                 ->map(function ($attendance) {
                     return [
-                        'id' => $attendance->id,
-                        'user_id' => $attendance->user_id,
+                        'attendance_id' => $attendance->id,
                         'the_date' => $attendance->the_date,
                         'present' => $attendance->present,
-                        'user' => [
-                            'id' => $attendance->user->id,
-                            'first_name' => $attendance->user->first_name,
-                            'last_name' => $attendance->user->last_name,
-                            'phone' => $attendance->user->phone,
-                            'image' => $attendance->user->image,
-                        ]
                     ];
                 });
 
@@ -511,28 +361,6 @@ class AttendanceController extends Controller
     }
 
 
-    //////////////ارجاع صورة QR///////////
-    public function getQrImage(Request $request)
-    {
-        $qrImageDirectory = 'public/qr/';
-        $files = Storage::files($qrImageDirectory);
-
-        if (count($files) > 0) {
-
-            usort($files, function($a, $b) {
-                return filemtime(Storage::path($b)) - filemtime(Storage::path($a));
-            });
-            $newestFile = $files[0];
-            $imageName = basename($newestFile);
-            $imagePath = $qrImageDirectory . $imageName;
-
-            return response()->file(Storage::path($imagePath));
-        } else {
-            return response()->json([
-                'message' => "No QR code images found"
-            ], 404);
-        }
-    }
 
 }
 

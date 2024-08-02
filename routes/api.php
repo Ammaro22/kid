@@ -61,6 +61,7 @@ Route::get('show_all_Record_student',[RecordOrderController::class,'showAllRecor
 Route::get('show_Record_student/{id}',[RecordOrderController::class,'showRecordDetails'])->middleware('auth:api');
 Route::post('accept_record/{id}', [RecordOrderController::class, 'acceptrecord'])->middleware('auth:api');
 Route::delete('inaccept_record/{id}', [RecordOrderController::class, 'delete_record'])->middleware('auth:api');
+Route::get('show_record_for_parent', [RecordOrderController::class, 'showRecords'])->middleware('auth:api');
 /*البحث عن طالب*/
 Route::post('search_student',[StudentController::class,'searchStudents']);
 /*الفاتورة*/
@@ -134,11 +135,11 @@ Route::get('get_Student_Attendance_History_for_parent_by_day',[AttendanceControl
 Route::get('get_Student_Attendance_History_for_parent_by_month',[AttendanceController::class,'getmyStudentAttendanceHistorymonth'])->middleware('auth:api');
 
 //////////////////حضور المعلمات/////////////////
-Route::get('make_attendance_for_teacher',[AttendanceController::class,'readQrCode'])->middleware('auth:api');
-Route::get('generate_qr_code', [AttendanceController::class, 'generateQrCode'])->middleware('auth:api');
+Route::get('make_attendance_for_teacher',[AttendanceController::class,'recordAttendance'])->middleware('auth:api');
+
 ////////////////// عرض حضور الخاص بالمديرة/////////////////
-Route::get('get_all_attendance', [AttendanceController::class, 'getAllAttendance'])->middleware('auth:api');
-Route::get('get_all_attendance_for_teacher_by_date', [AttendanceController::class, 'getAllAttendancforteacherbydate'])->middleware('auth:api');
+Route::get('get_all_attendance_for_teacher_by_month', [AttendanceController::class, 'getAllAttendanceForTeacherByMonth'])->middleware('auth:api');
+Route::get('get_attendance_for_teacher_by_date', [AttendanceController::class, 'getAllAttendanceForTeacherByDate'])->middleware('auth:api');
 /*استلام الصورة من QR حسب الاسم*/
 Route::post('qr-image', [AttendanceController::class, 'getQrImage']);
 /*السجلات المالية*/

@@ -110,60 +110,102 @@ class ReservationController extends Controller
 
     //////////////////عرض طلب الاهل من الموافق عليه/////////////
 
+//    public function show()
+//    {
+//
+//        if (Auth::user()->role_id == 4 ) {
+//
+//            $reservations = Reservation::where('reservations.status', 'accept')
+//                ->with('user:id,first_name,last_name,image')
+//                ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
+//                ->select('reservations.description', 'reservations.user_id', 'reservations.id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
+//                ->get();
+//
+//            return response()->json($reservations);
+//        }
+//        else {
+//
+//            return response()->json([
+//
+//                'message' => 'you are not authorized to do this'
+//
+//            ], 403);
+//
+//        }
+//
+//    }
+
     public function show()
     {
+        $userId = Auth::user()->id;
 
-        if (Auth::user()->role_id == 4 ) {
+        $reservations = Reservation::where('reservations.user_id', $userId)
+            ->with('user:id,first_name,last_name,image')
+            ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
+            ->select(  'reservations.id', 'reservations.appointment_id', 'reservations.status', 'appointments.the_day', 'appointments.the_time')
+            ->get();
 
-            $reservations = Reservation::where('reservations.status', 'accept')
-                ->with('user:id,first_name,last_name,image')
-                ->leftJoin('appointments', 'reservations.appointment_id', '=', 'appointments.id')
-                ->select('reservations.description', 'reservations.user_id', 'reservations.id', 'reservations.appointment_id', 'appointments.the_day', 'appointments.the_time')
-                ->get();
-
-            return response()->json($reservations);
-        }
-        else {
-
-            return response()->json([
-
-                'message' => 'you are not authorized to do this'
-
-            ], 403);
-
-        }
-
+        return response()->json($reservations);
     }
+
+//    public function delete_record($id)
+//    {
+//        if (Auth::user()->role_id == 1 ||  Auth::user()->role_id == 2) {
+//        $record = Reservation::find($id);
+//
+//        if (!$record) {
+//            return response()->json([
+//                'status' => false,
+//                'msg' => 'Invoice not found'
+//            ]);
+//        }
+//
+//        $apponitment = $record->appointment();
+//        $apponitment->delete();
+//
+//        $record->delete();
+//
+//        return response()->json([
+//            'status' => true,
+//            'msg' => 'Deleted successfully'
+//        ]);
+//    }
+//    else{
+//
+//        return response()->json([
+//            'status' => true,
+//            'msg' => 'you are not authorized to do this'
+//        ]);
+//    }
+//    }
 
     public function delete_record($id)
     {
-        if (Auth::user()->role_id == 1 ||  Auth::user()->role_id == 2) {
-        $record = Reservation::find($id);
+        if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
+            $record = Reservation::find($id);
 
-        if (!$record) {
+            if (!$record) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => 'Invoice not found'
+                ]);
+            }
+
+
+            $record->status = 'Reservation refused';
+            $record->save();
+
+
             return response()->json([
-                'status' => false,
-                'msg' => 'Invoice not found'
+                'status' => true,
+                'msg' => 'Deleted successfully'
+            ]);
+        } else {
+            return response()->json([
+                'status' => true,
+                'msg' => 'you are not authorized to do this'
             ]);
         }
-
-        $apponitment = $record->appointment();
-        $apponitment->delete();
-
-        $record->delete();
-
-        return response()->json([
-            'status' => true,
-            'msg' => 'Deleted successfully'
-        ]);
-    }
-    else{
-
-        return response()->json([
-            'status' => true,
-            'msg' => 'you are not authorized to do this'
-        ]);
-    }
     }
 
 }

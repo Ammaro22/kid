@@ -277,6 +277,8 @@ class EvaluationController extends Controller
 
 
 
+
+
     public function showEvaluationsforparent(Request $request)
     {
         $day = $request->input('day');
@@ -309,12 +311,20 @@ class EvaluationController extends Controller
 
         $noteIds = $evaluations->pluck('note_id');
         $notes = Note::whereIn('id', $noteIds)->get();
-
+        $note = $notes->firstWhere('id', $evaluations->first()->note_id);
         $output = [
             'student_name' => $student->name,
             'class_name' => $student->category->name,
-            'evaluation' => $evaluations->toArray(),
-            'note_teacher' => $notes->toArray(),
+            'note_teacher' => $note ? $note->note_teacher : null,
+            'note_admin' => $note ? $note->note_admin : null,
+            'evaluations' => $evaluations->map(function ($evaluation) {
+                return [
+                    'id' => $evaluation->id,
+                    'evaluation' => $evaluation->evaluation,
+                    'subject_name' => $evaluation->subject1->name,
+                    'created_at' => $evaluation->created_at->format('Y-m-d'),
+                ];
+            })->toArray(),
             'images' => $images->toArray()
         ];
 
@@ -326,9 +336,8 @@ class EvaluationController extends Controller
     }
 
 
-    public function showEvaluationsforparentmonth(Request $request)
+    public function showEvaluationsForParentMonth(Request $request)
     {
-
         $month = $request->input('month');
         $year = $request->input('year');
         $studentName = $request->input('student_name');
@@ -341,27 +350,47 @@ class EvaluationController extends Controller
             ->where('name', $studentName)
             ->where('user_id', $userId)
             ->first();
-        $studentId = $student->id;
-
-        $images = Image_child::where('student_id', $studentId)->get();
 
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $evaluations = $student->evaluation1->filter(function ($evaluation) use ( $month, $year) {
-            return  $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+        $studentId = $student->id;
+        $images = Image_child::where('student_id', $studentId)->get();
+
+        $evaluations = $student->evaluation1->filter(function ($evaluation) use ($month, $year) {
+            return $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
         });
 
         $noteIds = $evaluations->pluck('note_id');
         $notes = Note::whereIn('id', $noteIds)->get();
 
+        $groupedEvaluations = $evaluations->groupBy(function ($evaluation) {
+            return $evaluation->created_at->format('Y-m-d');
+        });
+
+        $evaluationDaysCount = $groupedEvaluations->keys()->count();
+
         $output = [
             'student_name' => $student->name,
             'class_name' => $student->category->name,
-            'evaluation' => $evaluations->toArray(),
-            'note_teacher' => $notes->toArray(),
-            'images' => $images->toArray()
+            'evaluation_days_count' => $evaluationDaysCount,
+            'evaluations' => $groupedEvaluations->map(function ($evaluationsByDate) use ($notes) {
+                $note = $notes->firstWhere('id', $evaluationsByDate->first()->note_id);
+                return [
+                    'date' => $evaluationsByDate->first()->created_at->format('Y-m-d'),
+                    'note_teacher' => $note ? $note->note_teacher : null,
+                    'note_admin' => $note ? $note->note_admin : null,
+                    'evaluations' => $evaluationsByDate->map(function ($evaluation) {
+                        return [
+                            'id' => $evaluation->id,
+                            'evaluation' => $evaluation->evaluation,
+                            'subject_name' => $evaluation->subject1->name,
+                        ];
+                    })->values()->toArray(),
+                ];
+            })->values()->toArray(),
+            'images' => $images->toArray(),
         ];
 
         if ($evaluations->isNotEmpty()) {
@@ -370,4 +399,8 @@ class EvaluationController extends Controller
             return response()->json(['message' => 'Evaluation not found'], 404);
         }
     }
+
+
+
+
 }

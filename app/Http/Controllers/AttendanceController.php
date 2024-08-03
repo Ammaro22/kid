@@ -290,8 +290,7 @@ class AttendanceController extends Controller
         ], 200);
     }
     ///////////////////////////////
-
-
+    
 
     public function getAllAttendanceForTeacherByMonth(Request $request)
     {
@@ -317,10 +316,12 @@ class AttendanceController extends Controller
             ->get();
 
         $attendancesData = $attendances->map(function ($attendance) {
+            $createdAtString = $attendance->created_at?->format('H:i:s') ?? 'N/A';
             return [
                 'id' => $attendance->id,
                 'the_date' => $attendance->the_date,
                 'present' => $attendance->present,
+                'hour' => $createdAtString
             ];
         });
 
@@ -351,6 +352,7 @@ class AttendanceController extends Controller
                         'attendance_id' => $attendance->id,
                         'the_date' => $attendance->the_date,
                         'present' => $attendance->present,
+                        'hour'=>$attendance->created_at->format('H:i:s')
                     ];
                 });
 

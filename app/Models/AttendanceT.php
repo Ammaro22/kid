@@ -10,7 +10,7 @@ class AttendanceT extends Model
     use HasFactory;
     protected $table = 'attendance_t_s';
     protected $primaryKey ='id';
-    public $timestamps = false;
+    public $timestamps = true;
     protected $fillable = [
         'user_id',
         'the_date',

@@ -290,7 +290,7 @@ class AttendanceController extends Controller
         ], 200);
     }
     ///////////////////////////////
-    
+
 
     public function getAllAttendanceForTeacherByMonth(Request $request)
     {

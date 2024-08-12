@@ -122,20 +122,49 @@ class DisbursedInvoiceController extends Controller
         ], 200);
     }
 
-    public function getTotalPriceByInvoiceType($invoiceTypeId)
+//    public function getTotalPriceByInvoiceType($invoiceTypeId)
+//    {
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 1) {
+//            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
+//        }
+//
+//
+//        $totalPrice = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)
+//            ->sum('price');
+//
+//
+//        return response()->json([
+//            'total_price' => $totalPrice,
+//        ], 200);
+//    }
+
+    public function getTotalPriceByInvoiceType()
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
+        if ($userRole != 1) {
             return response()->json(['message' => 'You are not authorized to perform this action'], 401);
         }
 
+        $invoiceTypes = [
+            1 => 'Occasions',
+            2 => 'School Uniforms',
+            3 => 'Stationary',
+            4 => 'Other',
+        ];
 
-        $totalPrice = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)
-            ->sum('price');
+        $totalPrices = [];
+        $grandTotal = 0;
+        foreach ($invoiceTypes as $invoiceTypeId => $invoiceTypeName) {
 
+            $total = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)->sum('price');
+            $totalPrices[$invoiceTypeName] = $total;
+            $grandTotal += $total;
+        }
 
         return response()->json([
-            'total_price' => $totalPrice,
+            'total_prices' => $totalPrices,
+            'grand_total' => $grandTotal,
         ], 200);
     }
 

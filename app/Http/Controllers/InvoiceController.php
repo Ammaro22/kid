@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Image_child;
 use App\Models\Invoice;
+use App\Models\Record_order;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -18,11 +20,19 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $studentId = $request->input('student_id');
+        $recordOrderId = $request->input('record_order_id');
         $batch = $request->input('batch');
 
+        $recordOrder = Record_order::find($recordOrderId);
 
-        $student = Student::find($studentId);
+        if (!$recordOrder) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'Record order not found'
+            ]);
+        }
+
+        $student = $recordOrder->stud;
 
         if (!$student) {
             return response()->json([
@@ -32,17 +42,53 @@ class InvoiceController extends Controller
         }
 
         $invoice = Invoice::create([
-            'student_id' => $studentId,
+            'student_id' => $student->id,
             'batch' => $batch,
-
         ]);
 
         return response()->json([
             'status' => true,
             'msg' => 'Invoice created successfully',
-            'invoice'=>$invoice
+            'invoice' => $invoice
         ]);
     }
+
+    public function createInvoicebyname(Request $request)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $studentName = $request->input('student_name');
+        $fatherName = $request->input('father_name');
+        $motherName = $request->input('mother_name');
+        $batch = $request->input('batch');
+
+        $student = Student::where('name', $studentName)
+            ->where('name_father', $fatherName)
+            ->where('name_mother', $motherName)
+            ->first();
+
+        if (!$student) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'Student not found'
+            ]);
+        }
+
+        $invoice = Invoice::create([
+            'student_id' => $student->id,
+            'batch' => $batch,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'msg' => 'Invoice created successfully',
+            'invoice' => $invoice
+        ]);
+    }
+
 
     public function updateInvoice(Request $request)
     {
@@ -129,9 +175,21 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $invoices = Invoice::whereHas('Studen2', function ($query) use ($categoryId) {
-            $query->where('category_id', $categoryId);
-        })->get();
+        $invoices = Invoice::select(
+            'invoices.id',
+            'students.name AS student_name',
+             'invoices.batch',
+            'invoices.created_at'
+        )
+            ->whereHas('Studen2', function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            })
+            ->join('students', 'invoices.student_id', '=', 'students.id')
+            ->get()
+            ->map(function ($invoice) {
+                $invoice->created_at = $invoice->created_at->format('Y-m-d');
+                return $invoice;
+            });
 
         if ($invoices->isEmpty()) {
             return response()->json([
@@ -145,6 +203,8 @@ class InvoiceController extends Controller
             'invoices' => $invoices
         ]);
     }
+
+
     public function getTotalInvoicesByCategory()
     {
         $userRole = auth()->user()->role_id;
@@ -177,6 +237,7 @@ class InvoiceController extends Controller
 
 
 
+    /////////////الاهل///////////////////////////
     public function getInvoicesByStudent(Request $request, $student_id)
     {
         $user = auth()->user();

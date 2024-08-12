@@ -135,33 +135,6 @@ class EvaluationController extends Controller
     }
 
 
-//    public function showEvaluations(Request $request, $studentId)
-//    {
-//
-//        $day = $request->input('day');
-//        $month = $request->input('month');
-//        $year = $request->input('year');
-//
-//
-//        $student = Student::findOrFail($studentId);
-//        $evaluations = $student->evaluation1;
-//        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($day ,$month , $year) {
-//            return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
-//        });
-//        $noteIds = $filteredEvaluations->pluck('note_id');
-//        $notes = Note::whereIn('id', $noteIds)->get();
-//        $output = [
-//            'evaluation' => $filteredEvaluations->toArray(),
-//            'note_teacher' => $notes->toArray(),
-//
-//        ];
-//
-//        if ($filteredEvaluations->isNotEmpty()) {
-//            return response()->json($output);
-//        } else {
-//            return response()->json(['message' => 'evaluation not found'], 404);
-//        }
-//    }
 
     public function showEvaluations(Request $request, $studentId)
     {
@@ -170,7 +143,7 @@ class EvaluationController extends Controller
         $year = $request->input('year');
 
         $student = Student::findOrFail($studentId);
-        $evaluations = $student->evaluation1;
+        $evaluations = $student->evaluation1->sortBy('created_at');
         $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($day, $month, $year) {
             return $evaluation->created_at->format('d') == $day && $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
         });
@@ -183,10 +156,10 @@ class EvaluationController extends Controller
                 return [
                     'id' => $evaluation->id,
                     'subject' => $evaluation->subject1->name,
-                    'evaluation'=>$evaluation->evaluation,
+                    'evaluation' => $evaluation->evaluation,
                     'created_at' => $evaluation->created_at->format('Y-m-d H:i:s'),
                 ];
-            })->toArray(),
+            })->values()->toArray(),
             'note_teacher' => $notes->toArray(),
         ];
 
@@ -197,31 +170,6 @@ class EvaluationController extends Controller
         }
     }
 
-//    public function showEvaluationsmonth(Request $request, $studentId)
-//    {
-//
-//        $month = $request->input('month');
-//        $year = $request->input('year');
-//
-//        $student = Student::findOrFail($studentId);
-//        $evaluations = $student->evaluation1;
-//        $filteredEvaluations = $evaluations->filter(function ($evaluation) use ($month , $year) {
-//            return $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
-//        });
-//        $noteIds = $filteredEvaluations->pluck('note_id');
-//        $notes = Note::whereIn('id', $noteIds)->get();
-//        $output = [
-//            'evaluation' => $filteredEvaluations->toArray(),
-//            'note_teacher' => $notes->toArray(),
-//
-//        ];
-//
-//        if ($filteredEvaluations->isNotEmpty()) {
-//            return response()->json($output);
-//        } else {
-//            return response()->json(['message' => 'evaluation not found'], 404);
-//        }
-//    }
 
     public function showEvaluationsmonth(Request $request, $studentId)
     {
@@ -276,9 +224,6 @@ class EvaluationController extends Controller
     /*عرض تقيمات الطالب بالنسبة لاهله*/
 
 
-
-
-
     public function showEvaluationsforparent(Request $request)
     {
         $day = $request->input('day');
@@ -307,7 +252,7 @@ class EvaluationController extends Controller
             return $evaluation->created_at->format('d') == $day &&
                 $evaluation->created_at->format('m') == $month &&
                 $evaluation->created_at->format('Y') == $year;
-        });
+        })->values();
 
         $noteIds = $evaluations->pluck('note_id');
         $notes = Note::whereIn('id', $noteIds)->get();
@@ -324,8 +269,7 @@ class EvaluationController extends Controller
                     'subject_name' => $evaluation->subject1->name,
                     'created_at' => $evaluation->created_at->format('Y-m-d'),
                 ];
-            })->toArray(),
-            'images' => $images->toArray()
+            })->values()->all(),
         ];
 
         if ($evaluations->isNotEmpty()) {
@@ -334,7 +278,6 @@ class EvaluationController extends Controller
             return response()->json(['message' => 'Evaluation not found'], 404);
         }
     }
-
 
     public function showEvaluationsForParentMonth(Request $request)
     {

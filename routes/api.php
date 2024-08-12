@@ -66,7 +66,8 @@ Route::get('show_record_for_parent', [RecordOrderController::class, 'showRecords
 Route::post('search_student',[StudentController::class,'searchStudents']);
 /*الفاتورة*/
 
-Route::post('create_invoice',[InvoiceController::class,'createInvoice'])->middleware('auth:api');
+Route::post('create_invoice_by_record',[InvoiceController::class,'createInvoice'])->middleware('auth:api');
+Route::post('create_invoice_by_name_student',[InvoiceController::class,'createInvoicebyname'])->middleware('auth:api');
 Route::post('update_invoice',[InvoiceController::class,'updateInvoice'])->middleware('auth:api');
 Route::delete('delete_invoice/{id}',[InvoiceController::class,'deleteInvoice'])->middleware('auth:api');
 Route::post('get&&sum_invoices/{id}', [InvoiceController::class, 'getStudentInvoicesTotal'])->middleware('auth:api');
@@ -109,7 +110,7 @@ Route::post('accept_reservation_by_admin/{id}', [ReservationController::class, '
 Route::get('view_reservation_for_parent', [ReservationController::class, 'show'])->middleware('auth:api');
 /* رفض الحجوزات للاهل*/
 Route::delete('inaccept_reservation_by_admin/{id}', [ReservationController::class, 'delete_record'])->middleware('auth:api');
-
+Route::delete('delete_reservation_by_admin/{id}', [ReservationController::class, 'delete_reservation'])->middleware('auth:api');
 /*التقيمات*/
 Route::post('add_evaluation',[EvaluationController::class,'createEvaluation'])->middleware('auth:api');
 Route::post('update_evaluation/{id}',[EvaluationController::class,'updateEvaluation'])->middleware('auth:api');

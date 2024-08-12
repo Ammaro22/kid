@@ -149,7 +149,6 @@ Route::post('update_disbursed_invoices/{id}',[DisbursedInvoiceController::class,
 Route::get('show_disbursed_invoices_by_invoice_type/{id}',[DisbursedInvoiceController::class,'getDisbursedInvoicesByType'])->middleware('auth:api');
 Route::get('show_all_disbursed_invoices',[DisbursedInvoiceController::class,'getAllDisbursedInvoices'])->middleware('auth:api');
 Route::get('getTotalPrice&Profit_By_year',[DisbursedInvoiceController::class,'getTotalPriceandProfitByyear'])->middleware('auth:api');
-Route::get('get_total__price_disbursed_invoices',[DisbursedInvoiceController::class,'getTotalPrice'])->middleware('auth:api');
 Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::class,'deleteDisbursedInvoice'])->middleware('auth:api');
 
 

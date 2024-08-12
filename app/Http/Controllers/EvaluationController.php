@@ -270,6 +270,7 @@ class EvaluationController extends Controller
                     'created_at' => $evaluation->created_at->format('Y-m-d'),
                 ];
             })->values()->all(),
+            'images' => $images->toArray()
         ];
 
         if ($evaluations->isNotEmpty()) {

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Disbursed_invoice;
+use App\Models\Invoice;
 use App\Models\invoice_type;
+use App\Models\Profit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -79,20 +81,43 @@ class DisbursedInvoiceController extends Controller
 
     public function getDisbursedInvoicesByType(Request $request, $invoiceTypeId)
     {
-
         $userRole = auth()->user()->role_id;
         if ($userRole !== 1) {
             return response()->json(['message' => 'You are not authorized to perform this action'], 401);
         }
 
+        $year = $request->input('year');
 
         $disbursedInvoices = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)
+            ->whereYear('created_at', $year)
             ->with('invoice_ty')
-            ->get();
+            ->get()
+            ->groupBy(function ($item) use ($year, $invoiceTypeId) {
+                return "$year-$invoiceTypeId";
+            })
+            ->map(function ($group) use ($invoiceTypeId) {
+                return [
+                    'year' => $group->first()->created_at->format('Y'),
+                    'invoice_type_id' => $invoiceTypeId,
+                    'invoices' => $group->map(function ($invoice) {
+                        return [
+                            'id' => $invoice->id,
+                            'invoice_type' => $invoice->invoice_ty->name,
+                            'price' => $invoice->price,
+                            'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
+                        ];
+                    })->values()->all(),
+                ];
+            })
+            ->values()
+            ->all();
 
+        if (empty($disbursedInvoices)) {
+            return response()->json(['message' => 'No invoices found for the given criteria'], 404);
+        }
 
         return response()->json([
-            'invoices' => $disbursedInvoices,
+            'invoices' => $disbursedInvoices
         ], 200);
     }
 
@@ -113,6 +138,7 @@ class DisbursedInvoiceController extends Controller
                 'price' => $invoice->price,
                 'invoice_type_id' => $invoice->invoice_type_id,
                 'invoice_type_name' => $invoice->invoice_ty->name,
+                'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
             ];
         });
 
@@ -122,29 +148,14 @@ class DisbursedInvoiceController extends Controller
         ], 200);
     }
 
-//    public function getTotalPriceByInvoiceType($invoiceTypeId)
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 1) {
-//            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
-//        }
-//
-//
-//        $totalPrice = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)
-//            ->sum('price');
-//
-//
-//        return response()->json([
-//            'total_price' => $totalPrice,
-//        ], 200);
-//    }
-
-    public function getTotalPriceByInvoiceType()
+    public function getTotalPriceandProfitByyear(Request $request)
     {
         $userRole = auth()->user()->role_id;
         if ($userRole != 1) {
             return response()->json(['message' => 'You are not authorized to perform this action'], 401);
         }
+
+        $year = $request->input('year', date('Y'));
 
         $invoiceTypes = [
             1 => 'Occasions',
@@ -156,31 +167,24 @@ class DisbursedInvoiceController extends Controller
         $totalPrices = [];
         $grandTotal = 0;
         foreach ($invoiceTypes as $invoiceTypeId => $invoiceTypeName) {
-
-            $total = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)->sum('price');
+            $total = Disbursed_invoice::whereYear('created_at', $year)
+                ->where('invoice_type_id', $invoiceTypeId)
+                ->sum('price');
             $totalPrices[$invoiceTypeName] = $total;
             $grandTotal += $total;
         }
 
+        $totalInvoices = Invoice::whereYear('created_at', $year)->sum('batch');
+        $profitAmount = $totalInvoices - $grandTotal;
+
+        // Create the profit record
+        $profit = Profit::create(['profits' => $profitAmount, 'year' => $year]);
+
         return response()->json([
             'total_prices' => $totalPrices,
             'grand_total' => $grandTotal,
-        ], 200);
-    }
-
-    public function getTotalPrice()
-    {
-
-        $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
-            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
-        }
-
-        $invoices = Disbursed_invoice::
-            all();
-        $totalPrice = $invoices->sum('price');
-        return response()->json([
-            'total_price' => $totalPrice,
+            'profit' => $profitAmount,
+            'year' => $year,
         ], 200);
     }
 
@@ -199,7 +203,7 @@ if (!$invoice)
 
     return response()->json([
         'error' => 'Disbursed invoice not found',
-    ], 200);
+    ], 404);
 }
         $invoice->delete();
 

@@ -128,9 +128,17 @@ class DisbursedInvoiceController extends Controller
             return response()->json(['message' => 'You are not authorized to perform this action'], 401);
         }
 
+        $year = $request->input('year');
 
-        $disbursedInvoices = Disbursed_invoice::with('invoice_ty')->get();
+        $disbursedInvoices = Disbursed_invoice::with('invoice_ty')
+            ->whereYear('created_at', $year)
+            ->get();
 
+        if ($disbursedInvoices->isEmpty()) {
+            return response()->json([
+                'message' => "No disbursed invoices found for the year $year.",
+            ], 200);
+        }
 
         $invoices = $disbursedInvoices->map(function ($invoice) {
             return [
@@ -142,11 +150,12 @@ class DisbursedInvoiceController extends Controller
             ];
         });
 
-
         return response()->json([
             'invoices' => $invoices,
         ], 200);
     }
+
+
 
     public function getTotalPriceandProfitByyear(Request $request)
     {

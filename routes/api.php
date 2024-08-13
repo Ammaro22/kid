@@ -53,6 +53,7 @@ Route::post('update_info_student/{id}',[StudentController::class,'update'])->mid
 Route::post('show_student/{id}',[StudentController::class,'showStudent']);
 Route::delete('delete_student/{id}',[StudentController::class,'destroy'])->middleware('auth:api');
 Route::get('show_student_by_category/{id}',[StudentController::class,'showStudentsbycategory']);
+Route::get('get_number_student_in_category',[StudentController::class,'getStudentCountByCategory'])->middleware('auth:api');
 /*عرض معلومات الطفل لاهله*/
 Route::post('show_student_for_parent',[StudentController::class,'showStudentforparent'])->middleware('auth:api');
 /*تقرير الطلب*/

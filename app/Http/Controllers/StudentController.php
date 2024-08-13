@@ -352,6 +352,28 @@ class StudentController extends Controller
         ], 200);
     }
 
+    public function getStudentCountByCategory(Request $request)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2 ) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $year = $request->input('year', date('Y'));
+
+        $studentCountByCategory = Category::withCount(['stu' => function ($query) use ($year) {
+            $query->whereYear('created_at', $year);
+        }])
+            ->get()
+            ->mapWithKeys(function ($category) {
+                return [$category->name => $category->stu_count];
+            });
+
+        return response()->json([
+            'student_count_by_category' => $studentCountByCategory,
+            'year' => $year
+        ]);
+    }
+
     /*عرض معلومات الطفل لاهله*/
 
     public function showStudentforparent(Request $request)

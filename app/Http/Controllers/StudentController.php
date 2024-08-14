@@ -374,6 +374,37 @@ class StudentController extends Controller
         ]);
     }
 
+    public function searchStudents2(Request $request)
+    {
+        $query = $request->input('name_student');
+
+        $students = Student::query()
+            ->where('name', 'like', '%' . $query . '%')
+            ->with(['category', 'User'])
+            ->get();
+
+        if ($students->isEmpty()) {
+            return response()->json([
+                'error' => 'No students found with the provided name.',
+            ], 404);
+        }
+
+        $searchResults = [];
+
+        foreach ($students as $student) {
+            $searchResults[] = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'name_father' => $student->name_father,
+                'category_name' => $student->category->name,
+            ];
+        }
+
+        return response()->json([
+            'searchResults' => $searchResults,
+        ], 200);
+    }
+
     /*عرض معلومات الطفل لاهله*/
 
     public function showStudentforparent(Request $request)

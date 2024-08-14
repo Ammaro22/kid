@@ -146,7 +146,7 @@ class DisbursedInvoiceController extends Controller
                 'price' => $invoice->price,
                 'invoice_type_id' => $invoice->invoice_type_id,
                 'invoice_type_name' => $invoice->invoice_ty->name,
-                'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
+                'created_at' => $invoice->created_at->format('Y-m-d'),
             ];
         });
 

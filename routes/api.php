@@ -65,6 +65,7 @@ Route::delete('inaccept_record/{id}', [RecordOrderController::class, 'delete_rec
 Route::get('show_record_for_parent', [RecordOrderController::class, 'showRecords'])->middleware('auth:api');
 /*البحث عن طالب*/
 Route::post('search_student',[StudentController::class,'searchStudents']);
+Route::post('search_student_for',[StudentController::class,'searchStudents2']);
 /*الفاتورة*/
 
 Route::post('create_invoice_by_record',[InvoiceController::class,'createInvoice'])->middleware('auth:api');
@@ -74,7 +75,7 @@ Route::delete('delete_invoice/{id}',[InvoiceController::class,'deleteInvoice'])-
 Route::post('get&&sum_invoices/{id}', [InvoiceController::class, 'getStudentInvoicesTotal'])->middleware('auth:api');
 Route::post('get_invoices_by_category/{id}', [InvoiceController::class, 'getStudentInvoicesByCategoryTotal'])->middleware('auth:api');
 Route::get('get_total_invoices_for_category', [InvoiceController::class, 'getTotalInvoicesByCategory'])->middleware('auth:api');
-
+Route::post('get_invoices_by_year', [InvoiceController::class, 'getStudentInvoicesByYear'])->middleware('auth:api');
 /*فواتير الابناء بالنسة للاهل*/
 Route::get('get_invoices_for_parent/{id}',[InvoiceController::class,'getInvoicesByStudent'])->middleware('auth:api');
 /*الاحداث*/

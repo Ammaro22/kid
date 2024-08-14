@@ -60,14 +60,11 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $studentName = $request->input('student_name');
-        $fatherName = $request->input('father_name');
-        $motherName = $request->input('mother_name');
+        $studentid = $request->input('student_id');
+
         $batch = $request->input('batch');
 
-        $student = Student::where('name', $studentName)
-            ->where('name_father', $fatherName)
-            ->where('name_mother', $motherName)
+        $student = Student::where('id', $studentid)
             ->first();
 
         if (!$student) {
@@ -235,7 +232,47 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function getStudentInvoicesByYear(Request $request)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
+        $year = $request->input('year');
+
+        $invoices = Invoice::select(
+            'invoices.id',
+            'students.name AS student_name',
+            'students.category_id',
+            'categories.name AS category_name',
+            'invoices.batch',
+            'invoices.created_at'
+        )
+            ->whereHas('Studen2', function ($query) {
+                $query->whereIn('category_id', [1, 2, 3]);
+            })
+            ->whereYear('invoices.created_at', $year)
+            ->join('students', 'invoices.student_id', '=', 'students.id')
+            ->join('categories', 'students.category_id', '=', 'categories.id')
+            ->get()
+            ->map(function ($invoice) {
+                $invoice->created_at = $invoice->created_at->format('Y-m-d');
+                return $invoice;
+            });
+
+        if ($invoices->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'No invoices found for the selected year'
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'invoices' => $invoices
+        ]);
+    }
 
     /////////////الاهل///////////////////////////
     public function getInvoicesByStudent(Request $request, $student_id)

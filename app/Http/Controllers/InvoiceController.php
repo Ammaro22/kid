@@ -13,6 +13,46 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
+//    public function createInvoice(Request $request)
+//    {
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 1 && $userRole !== 2) {
+//            return response()->json(['message' => 'Unauthorized'], 401);
+//        }
+//
+//        $recordOrderId = $request->input('record_order_id');
+//        $batch = $request->input('batch');
+//
+//        $recordOrder = Record_order::find($recordOrderId);
+//
+//        if (!$recordOrder) {
+//            return response()->json([
+//                'status' => false,
+//                'msg' => 'Record order not found'
+//            ]);
+//        }
+//
+//        $student = $recordOrder->student;
+//
+//        if (!$student) {
+//            return response()->json([
+//                'status' => false,
+//                'msg' => 'Student not found'
+//            ]);
+//        }
+//
+//        $invoice = Invoice::create([
+//            'student_id' => $student->id,
+//            'batch' => $batch,
+//        ]);
+//
+//        return response()->json([
+//            'status' => true,
+//            'msg' => 'Invoice created successfully',
+//            'invoice' => $invoice
+//        ]);
+//    }
+
     public function createInvoice(Request $request)
     {
         $userRole = auth()->user()->role_id;
@@ -20,19 +60,15 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $recordOrderId = $request->input('record_order_id');
+        $studentName = $request->input('student_name');
+        $fatherName = $request->input('father_name');
+        $motherName = $request->input('mother_name');
         $batch = $request->input('batch');
 
-        $recordOrder = Record_order::find($recordOrderId);
-
-        if (!$recordOrder) {
-            return response()->json([
-                'status' => false,
-                'msg' => 'Record order not found'
-            ]);
-        }
-
-        $student = $recordOrder->stud;
+        $student = Student::where('name', 'LIKE', '%' . $studentName . '%')
+            ->where('name_father', 'LIKE', '%' . $fatherName . '%')
+            ->where('name_mother', 'LIKE', '%' . $motherName . '%')
+            ->first();
 
         if (!$student) {
             return response()->json([
@@ -85,7 +121,6 @@ class InvoiceController extends Controller
             'invoice' => $invoice
         ]);
     }
-
 
     public function updateInvoice(Request $request)
     {
@@ -200,7 +235,6 @@ class InvoiceController extends Controller
             'invoices' => $invoices
         ]);
     }
-
 
     public function getTotalInvoicesByCategory()
     {

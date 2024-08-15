@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Image_child;
 use App\Models\Student;
+use App\Models\Student_before_accept;
 use App\Models\User;
 use App\Traits\Imageable;
 use Illuminate\Http\Request;
@@ -87,11 +88,11 @@ class StudentController extends Controller
 
         $studentData = array_merge($validatedData, $photoPaths);
 
-        $student = Student::create($studentData);
+        $student = Student_before_accept::create($studentData);
 
         if ($request->hasFile('images')) {
             $files = $request->file('images');
-            $savedImages = Imageable::ssave_c($files, $student->id);
+            $savedImages = Imageable::ssave_m($files, $student->id);
         }
 
         return response()->json([
@@ -258,6 +259,10 @@ class StudentController extends Controller
 
         $students = Student::where('category_id', $categoryId)->get();
 
+        if ($students->isEmpty()) {
+            return response()->json(['message' => 'No students found for this category'], 404);
+        }
+
         $studentsData = [];
         foreach ($students as $student) {
             $user = User::find($student->user_id);
@@ -268,16 +273,16 @@ class StudentController extends Controller
             $studentData = [
                 'id' => $student->id,
                 'name' => $student->name,
-                'gender'=>$student->gender,
-                'name_mother'=>$student->name_mother,
-                'name_father'=>$student->name_father,
-                'date_birth'=>$student->date_birth,
+                'gender' => $student->gender,
+                'name_mother' => $student->name_mother,
+                'name_father' => $student->name_father,
+                'date_birth' => $student->date_birth,
                 'user_name' => $nameUser,
                 'category_id' => $student->category_id,
                 'images' => $studentImages->map(function ($image) {
                     return [
                         'id' => $image->id,
-                        'name'=>$image->name,
+                        'name' => $image->name,
                         'path' => $image->path,
                     ];
                 })->toArray(),
@@ -340,16 +345,22 @@ class StudentController extends Controller
                 'name_father' => $student->name_father,
                 'name_mother' => $student->name_mother,
                 'category_name' => $student->category->name,
-
             ];
         }
-        $student_id = $searchResults[0]['id'];
-        $images = Image_child::where('student_id', $student_id)->get();
 
-        return response()->json([
-            'searchResults' => $searchResults,
-            'images'=>$images
-        ], 200);
+        if (count($searchResults) > 0) {
+            $student_id = $searchResults[0]['id'];
+            $images = Image_child::where('student_id', $student_id)->get();
+
+            return response()->json([
+                'searchResults' => $searchResults,
+                'images' => $images
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'No students found'
+            ], 404);
+        }
     }
 
     public function getStudentCountByCategory(Request $request)

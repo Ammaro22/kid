@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('image_children', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('student_before_accepts')->cascadeOnDelete();
             $table->string('path');
             $table->timestamps();
         });

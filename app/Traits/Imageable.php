@@ -4,6 +4,7 @@ namespace App\Traits;
 use App\Models\File;
 use App\Models\Image;
 use App\Models\Image_child;
+use App\Models\Image_student;
 
 
 trait Imageable
@@ -31,6 +32,21 @@ trait Imageable
             $path = 'students';
             $getImage->move($path, $name);
             $save = Image_child::create([
+                'name' => $name,
+                'path' => $path,
+                'student_id' => $id
+            ]);
+        }
+    }
+
+    public static function ssave_m($getImages,$id): void
+    {
+        foreach($getImages as $getImage) {
+            $filename = $getImage->getClientOriginalName();
+            $name = pathinfo($filename, PATHINFO_FILENAME) . '' . time() . '.' . $getImage->getClientOriginalExtension();
+            $path = 'students';
+            $getImage->move($path, $name);
+            $save = Image_student::create([
                 'name' => $name,
                 'path' => $path,
                 'student_id' => $id

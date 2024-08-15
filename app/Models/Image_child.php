@@ -17,7 +17,7 @@ class Image_child extends Model
         'path',
         'student_id'
     ];
-    public function studn(){
+    public function student(){
         return $this->belongsTo(Student::class,'student_id');
     }
 }

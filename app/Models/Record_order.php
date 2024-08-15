@@ -16,7 +16,11 @@ class Record_order extends Model
         'accept'
     ];
     public function stud(){
-        return $this->belongsTo(Student::class,'student_id');
+        return $this->belongsTo(Student_before_accept::class,'student_id');
+    }
+
+    public function student1(){
+        return $this->hasOne(Student::class,'record_order_id');
     }
 
 

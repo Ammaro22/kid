@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('record_orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('student_before_accepts')->cascadeOnDelete();
             $table->string('accept');
             $table->timestamps();
         });

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Image_child;
+use App\Models\Image_student;
 use App\Models\Record_order;
 use App\Models\Student;
+use App\Models\Student_before_accept;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -20,7 +22,7 @@ class RecordOrderController extends Controller
         $StudentId = $request->student_id;
         $accept = $request->input('accept', false);
 
-        $Student = Student::find($StudentId);
+        $Student = Student_before_accept::find($StudentId);
 
         if (!$Student) {
             return response()->json(['error' => 'student not found'], 404);
@@ -43,17 +45,51 @@ class RecordOrderController extends Controller
     {
         $userRole = auth()->user()->role_id;
         if ($userRole !== 1 && $userRole !== 2) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            abort(403, 'Unauthorized access');
         }
-        $record = Record_order::find($id);
 
+        $record = Record_order::find($id);
         if (!$record) {
-            return response()->json(['message' => 'invoice not found'], 404);
+            abort(404, 'Record order not found');
+        }
+
+        $studentBeforeAccept = Student_before_accept::find($record->student_id);
+        if (!$studentBeforeAccept) {
+            abort(404, 'Student record not found');
+        }
+
+        $student = $record->student1;
+        if (!$student) {
+            $student = new Student();
+            $student->fill($studentBeforeAccept->toArray());
+            $student->record_order_id = $record->id;
+            $student->save();
+
+            // Transfer images from image_student to image_children
+            foreach ($studentBeforeAccept->image_s as $image) {
+                $student->image_c()->create([
+                    'name' => $image->name,
+                    'path' => $image->path,
+                    'student_id' => $student->id,
+                ]);
+            }
+        } else {
+            $student->update($studentBeforeAccept->toArray());
+
+            // Transfer images from image_student to image_children
+            foreach ($studentBeforeAccept->image_s as $image) {
+                $student->image_c()->create([
+                    'name' => $image->name,
+                    'path' => $image->path,
+                    'student_id' => $student->id,
+                ]);
+            }
         }
 
         $record->accept = true;
         $record->save();
-        return response()->json(['message' => 'Successfully']);
+
+        return response()->json(['message' => 'Successfully accepted record']);
     }
 
     public function delete_record($id)
@@ -81,7 +117,6 @@ class RecordOrderController extends Controller
         ]);
     }
 
-
     public function showAllRecords()
     {
         $userRole = auth()->user()->role_id;
@@ -91,10 +126,16 @@ class RecordOrderController extends Controller
 
         $records = Record_order::where('accept', 0)->get();
 
+        if ($records->isEmpty()) {
+            return response()->json(['message' => 'No records found'], 404);
+        }
+
         $recordsData = [];
         foreach ($records as $record) {
-            $student = Student::find($record->student_id);
+            $student = Student_before_accept::find($record->student_id);
             $studentName = $student ? $student->name : 'Unknown';
+            $studentfName = $student ? $student->name_father : 'Unknown';
+            $studentmName = $student ? $student->name_mother : 'Unknown';
 
             $category = Category::find($student->category_id);
             $categoryName = $category ? $category->name : 'Unknown';
@@ -102,6 +143,8 @@ class RecordOrderController extends Controller
             $recordData = [
                 'id' => $record->id,
                 'student_name' => $studentName,
+                'father_name'=>$studentfName,
+                'mother_name'=>$studentmName,
                 'category_name' => $categoryName,
                 'created_at' => $record->created_at,
             ];
@@ -126,7 +169,7 @@ class RecordOrderController extends Controller
             return response()->json(['message' => 'Record not found'], 404);
         }
 
-        $student = Student::find($record->student_id);
+        $student = Student_before_accept::find($record->student_id);
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }

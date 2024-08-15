@@ -50,6 +50,7 @@ class Student extends Model
         'photo_father_identity',
         'photo_mother_identity',
         'photo_vaccine_card',
+        'record_order_id',
         'category_id',
         'user_id'
 
@@ -76,7 +77,10 @@ class Student extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    public function order()
+    {
+        return $this->belongsTo(Record_order::class);
+    }
     //////////////Attendance///////////////
     public function attendance(){
         return $this->hasMany(Attendance::class,'student_id');

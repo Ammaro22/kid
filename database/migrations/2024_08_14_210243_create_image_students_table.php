@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('student_before_accepts')->cascadeOnDelete();
             $table->string('path');
             $table->timestamps();
+
         });
     }
 

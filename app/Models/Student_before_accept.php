@@ -52,6 +52,7 @@ class Student_before_accept extends Model
         'category_id',
         'user_id'
 
+        
     ];
 
     public function image_s(){

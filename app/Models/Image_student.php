@@ -16,6 +16,7 @@ class Image_student extends Model
         'name',
         'path',
         'student_id'
+
     ];
     public function studn(){
         return $this->belongsTo(Student_before_accept::class,'student_id');

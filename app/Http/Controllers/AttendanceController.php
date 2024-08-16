@@ -332,31 +332,33 @@ class AttendanceController extends Controller
         return response()->json(['success' => true, 'attendances' => $attendancesData], 200);
     }
 
-    public function getAllAttendanceForTeacherByDate(Request $request)
+    public function getAllAttendanceForTeacherByDate(Request $request, $user_id)
     {
         if (Auth::user()->role_id == 1 || Auth::user()->role_id == 2) {
             $theDate = now()->format('Y-m-d');
-            $userId = $request->input('user_id');
 
             $attendances = AttendanceT::with('user')
                 ->whereHas('user', function ($query) {
                     $query->where('role_id', 3);
                 })
                 ->whereDate('the_date', $theDate)
-                ->when($userId, function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                })
-                ->get()
-                ->map(function ($attendance) {
-                    return [
-                        'attendance_id' => $attendance->id,
-                        'the_date' => $attendance->the_date,
-                        'present' => $attendance->present,
-                        'hour'=>$attendance->created_at->format('H:i:s')
-                    ];
-                });
+                ->where('user_id', $user_id)
+                ->get();
 
-            return response()->json(['success' => true, 'attendances' => $attendances], 200);
+            if ($attendances->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'No attendance records found for the specified user and date.'], 404);
+            }
+
+            $attendanceData = $attendances->map(function ($attendance) {
+                return [
+                    'attendance_id' => $attendance->id,
+                    'the_date' => $attendance->the_date,
+                    'present' => $attendance->present,
+                    'hour' => $attendance->created_at->format('H:i:s')
+                ];
+            });
+
+            return response()->json(['success' => true, 'attendances' => $attendanceData], 200);
         } else {
             return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
         }

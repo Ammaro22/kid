@@ -142,7 +142,7 @@ Route::get('make_attendance_for_teacher',[AttendanceController::class,'recordAtt
 
 ////////////////// عرض حضور الخاص بالمديرة/////////////////
 Route::get('get_all_attendance_for_teacher_by_month', [AttendanceController::class, 'getAllAttendanceForTeacherByMonth'])->middleware('auth:api');
-Route::get('get_attendance_for_teacher_by_date', [AttendanceController::class, 'getAllAttendanceForTeacherByDate'])->middleware('auth:api');
+Route::get('get_attendance_for_teacher_by_date/{id}', [AttendanceController::class, 'getAllAttendanceForTeacherByDate'])->middleware('auth:api');
 /*استلام الصورة من QR حسب الاسم*/
 Route::post('qr-image', [AttendanceController::class, 'getQrImage']);
 /*السجلات المالية*/

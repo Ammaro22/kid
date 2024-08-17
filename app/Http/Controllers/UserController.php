@@ -240,7 +240,7 @@ class UserController extends BaseController
         if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $users = User::where('role_id', 3)->select('id','first_name','last_name', 'image')->get();
+        $users = User::where('role_id', 3)->select('id','first_name','last_name', 'image','age','certificate')->get();
 
         return response()->json([
             'status' => 'success',

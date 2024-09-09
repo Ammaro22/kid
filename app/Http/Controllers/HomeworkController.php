@@ -66,55 +66,6 @@ class HomeworkController extends Controller
         ]);
     }
 
-
-//    public function show(Request $request, $category_id)
-//    {
-//        $category = Category::find($category_id);
-//
-//        if (!$category) {
-//            return response()->json([
-//                'status' => false,
-//                'message' => 'Category not found.',
-//                'data' => []
-//            ], 404);
-//        }
-//
-//        $day = $request->input('day');
-//        $month = $request->input('month');
-//        $year = $request->input('year');
-//
-//        $homeworks = Homework::where('category_id', $category_id)
-//            ->whereDay('created_at', $day)
-//            ->whereMonth('created_at', $month)
-//            ->whereYear('created_at', $year)
-//            ->orderByDesc('created_at')
-//            ->get();
-//
-//        if ($homeworks->isEmpty()) {
-//            return response()->json([
-//                'status' => false,
-//                'message' => 'No homeworks found for the specified day, month, and year.',
-//                'data' => []
-//            ], 404);
-//        }
-//
-//        $data = $homeworks->map(function ($homework) use ($category) {
-//            return [
-//                'day' => $homework->the_day,
-//                'subject' => $homework->Subject,
-//                'homework' => $homework->homework,
-//                'category' => $category->name,
-//                'date' => $homework->created_at->format('Y-m-d'),
-//            ];
-//        });
-//
-//        return response()->json([
-//            'status' => true,
-//            'message' => 'Homeworks retrieved successfully.',
-//            'data' => $data
-//        ]);
-//    }
-
     public function show(Request $request, $category_id)
     {
         $category = Category::find($category_id);
@@ -127,14 +78,19 @@ class HomeworkController extends Controller
             ], 404);
         }
 
+
+        $currentDate = now()->format('Y-m-d');
+
+
         $homeworks = Homework::where('category_id', $category_id)
+            ->whereDate('created_at', $currentDate)
             ->orderByDesc('created_at')
             ->get();
 
         if ($homeworks->isEmpty()) {
             return response()->json([
                 'status' => false,
-                'message' => 'No homeworks found for the specified category.',
+                'message' => 'No homeworks found for the specified category on the current date.',
                 'data' => []
             ], 404);
         }

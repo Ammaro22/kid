@@ -433,6 +433,7 @@ class StudentController extends Controller
                 'id' => $student->id,
                 'name' => $student->name,
                 'category' => $student->category->name,
+                'category_id'=>$student->category_id,
                 'images' => $images
             ];
         });

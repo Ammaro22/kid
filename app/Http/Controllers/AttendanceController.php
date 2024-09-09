@@ -170,7 +170,7 @@ class AttendanceController extends Controller
         try {
             $user = $request->user();
             $studentName = $request->input('student_name');
-            $theDate = $request->input('the_date');
+            $theDate = now()->format('Y-m-d');
 
             $student = $user->Student()->where('name', 'like', "%$studentName%")
                 ->first();
@@ -220,7 +220,7 @@ class AttendanceController extends Controller
         try {
             $user = $request->user();
             $studentName = $request->input('student_name');
-            $theDate = $request->input('the_date');
+            $theDate = now()->format('Y-m');
 
             if (!$theDate) {
                 return response()->json(['message' => 'Please provide a valid date.'], 400);

@@ -14,22 +14,30 @@ class DisbursedInvoiceController extends Controller
     public function createDisbursedInvoice(Request $request)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
+        if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         $validatedData = $request->validate([
             'price' => 'required|numeric',
-            'invoice_type_id' => 'required|exists:invoice_types,id',
+            'invoice_type_id' => 'required',
+            'description' => 'nullable|string',
         ]);
+
         $invoiceType = invoice_type::find($validatedData['invoice_type_id']);
         if (!$invoiceType) {
             return response()->json([
-                'error' => 'invoice type not found ',
+                'error' => 'Invoice type not found',
             ], 404);
         }
 
-        $disbursedInvoice = Disbursed_invoice::create($validatedData);
 
+        $disbursedInvoiceData = [
+            'price' => $validatedData['price'],
+            'invoice_type_id' => $validatedData['invoice_type_id'],
+            'description' => $validatedData['description'] ?? null,
+        ];
+
+        $disbursedInvoice = Disbursed_invoice::create($disbursedInvoiceData);
 
         return response()->json([
             'message' => 'Disbursed invoice created successfully',
@@ -41,7 +49,7 @@ class DisbursedInvoiceController extends Controller
     {
 
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
+        if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -82,10 +90,9 @@ class DisbursedInvoiceController extends Controller
     public function getDisbursedInvoicesByType(Request $request, $invoiceTypeId)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
-            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         $year = $request->input('year');
 
         $disbursedInvoices = Disbursed_invoice::where('invoice_type_id', $invoiceTypeId)
@@ -124,10 +131,9 @@ class DisbursedInvoiceController extends Controller
     public function getAllDisbursedInvoices(Request $request)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
-            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         $year = $request->input('year');
 
         $disbursedInvoices = Disbursed_invoice::with('invoice_ty')
@@ -160,10 +166,9 @@ class DisbursedInvoiceController extends Controller
     public function getTotalPriceandProfitByyear(Request $request)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole != 1) {
-            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         $year = $request->input('year', date('Y'));
 
         $invoiceTypes = [
@@ -197,14 +202,14 @@ class DisbursedInvoiceController extends Controller
         ], 200);
     }
 
+
     public function deleteDisbursedInvoice($id)
     {
 
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1) {
-            return response()->json(['message' => 'You are not authorized to perform this action'], 401);
+        if ($userRole !== 1 && $userRole !== 2) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
 
         $invoice = Disbursed_invoice::findOrFail($id);
 if (!$invoice)

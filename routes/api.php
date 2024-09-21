@@ -8,6 +8,7 @@ use App\Http\Controllers\DisbursedInvoiceController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\PermanentProgramController;
 use App\Http\Controllers\ProfitController;
@@ -38,6 +39,8 @@ Route::group(["middleware"=>["auth:api"]],function (){
     Route::post('user_update',[UserController::class,'update']);
 
 });
+/*تغير كلمة سر المديرة*/
+Route::post('update_password_admin',[UserController::class,'updatePassword'])->middleware('auth:api');
 /*عرض كل المعلمات*/
 Route::post('admin_update_techer/{id}',[UserController::class,'updateteacher'])->middleware('auth:api');
 Route::post('show_all_techer',[UserController::class,'getallteacher'])->middleware('auth:api');
@@ -159,3 +162,9 @@ Route::post('create_homework',[HomeworkController::class,'store'])->middleware('
 Route::post('update_homework/{id}',[HomeworkController::class,'update'])->middleware('auth:api');
 Route::get('get_homework/{id}',[HomeworkController::class,'show']);
 Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->middleware('auth:api');
+
+/*البنود*/
+Route::post('create_item',[ItemController::class,'createItem'])->middleware('auth:api');
+Route::post('update_item/{id}',[ItemController::class,'updateItem'])->middleware('auth:api');
+Route::get('get_item',[ItemController::class,'getItems']);
+Route::delete('delete_item/{id}',[ItemController::class,'deleteItem'])->middleware('auth:api');

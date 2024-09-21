@@ -15,6 +15,7 @@ class Homework extends Model
         'the_day',
         'Subject',
         'homework',
+        'Lesson_Name',
         'category_id'
     ];
     public function category2(){

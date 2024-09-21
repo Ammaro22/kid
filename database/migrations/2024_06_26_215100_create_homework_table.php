@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('the_day');
             $table->string('Subject');
+            $table->string('Lesson_Name');
             $table->string('homework');
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
 

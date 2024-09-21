@@ -19,12 +19,14 @@ class UserController extends BaseController
         $validator = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|string|max:255',
             'password' => 'required|string|min:4|max:15',
             'phone' => 'required|string|max:10|min:10',
             'age' => 'string',
             'image' => 'image',
             'certificate' => 'string',
+            'Previous_places_work' => 'string',
+            'Experience' => 'string',
+            'salary' => 'string',
             'role_id'
         ]);
 
@@ -43,11 +45,13 @@ class UserController extends BaseController
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'password' => $validator['password'],
-            'email' => $request->email,
             'age' => $request->age,
             'phone' => $request->phone,
             'image' => $path,
             'certificate' => $request->certificate,
+            'Previous_places_work' => $request->certificate,
+            'Experience' => $request->certificate,
+            'salary' => $request->certificate,
             'role_id' => $request->role_id
         ]);
 
@@ -58,7 +62,7 @@ class UserController extends BaseController
     public function login(Request $request)
     {
         $data = Validator::make($request->all(), [
-            'email' => 'required',
+            'phone' => 'required',
             'password' => 'required'
         ]);
 
@@ -66,7 +70,7 @@ class UserController extends BaseController
             return response(['errors' => $data->errors()->all()], 422);
         }
 
-        $credentials = request(['email', 'password']);
+        $credentials = request(['phone', 'password']);
 
         if (!auth()->attempt($credentials)) {
             return response(['errors' => 'Incorrect Details. Please try again'], 422);
@@ -129,11 +133,13 @@ class UserController extends BaseController
         }
         $user->first_name = $request->filled('first_name') ? $request->input('first_name') : $user->first_name;
         $user->last_name = $request->filled('last_name') ? $request->input('last_name') : $user->last_name;
-        $user->email = $request->filled('email') ? $request->input('email') : $user->email;
         $user->password = $request->filled('password') ? bcrypt($request->input('password')) : $user->password;
         $user->age = $request->filled('age') ? $request->input('age') : $user->age;
         $user->phone = $request->filled('phone') ? $request->input('phone') : $user->phone;
         $user->certificate = $request->filled('certificate') ? $request->input('certificate') : $user->certificate;
+        $user->Previous_places_work = $request->filled('Previous_places_work') ? $request->input('Previous_places_work') : $user->Previous_places_work;
+        $user->Experience = $request->filled('Experience') ? $request->input('Experience') : $user->Experience;
+        $user->salary = $request->filled('salary') ? $request->input('salary') : $user->salary;
         $user->role_id = $request->filled('role_id') ? $request->input('role_id') : $user->role_id;
 
         $user->save();
@@ -191,11 +197,13 @@ class UserController extends BaseController
         }
         $user->first_name = $request->filled('first_name') ? $request->input('first_name') : $user->first_name;
         $user->last_name = $request->filled('last_name') ? $request->input('last_name') : $user->last_name;
-        $user->email = $request->filled('email') ? $request->input('email') : $user->email;
         $user->password = $request->filled('password') ? bcrypt($request->input('password')) : $user->password;
         $user->age = $request->filled('age') ? $request->input('age') : $user->age;
         $user->phone = $request->filled('phone') ? $request->input('phone') : $user->phone;
         $user->certificate = $request->filled('certificate') ? $request->input('certificate') : $user->certificate;
+        $user->Previous_places_work = $request->filled('Previous_places_work') ? $request->input('Previous_places_work') : $user->Previous_places_work;
+        $user->Experience = $request->filled('Experience') ? $request->input('Experience') : $user->Experience;
+        $user->salary = $request->filled('salary') ? $request->input('salary') : $user->salary;
         $user->role_id = $request->filled('role_id') ? $request->input('role_id') : $user->role_id;
 
         $user->save();
@@ -221,26 +229,14 @@ class UserController extends BaseController
 
     }
 
-//    public function getallteacher()
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 1 && $userRole !== 2) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//        $users = User::where('role_id', 3)->get();
-//
-//        return response()->json([
-//            'status' => 'success',
-//            'users' => $users,
-//        ]);
-//    }
+
     public function getallteacher()
     {
         $userRole = auth()->user()->role_id;
         if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $users = User::where('role_id', 3)->select('id','first_name','last_name', 'image','age','certificate')->get();
+        $users = User::where('role_id', 3)->select('id','first_name','last_name', 'image','age','certificate','Previous_places_work','Experience','salary')->get();
 
         return response()->json([
             'status' => 'success',
@@ -267,6 +263,31 @@ class UserController extends BaseController
         return response()->json([
             'status' => 'success',
             'user' => $user,
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $userRole = auth()->user()->role_id;
+        if ($userRole !== 1 ) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $user = auth()->user();
+
+        $data = Validator::make($request->all(), [
+            'password' => 'required|string|min:4',
+        ]);
+
+        if ($data->fails()) {
+            return response()->json(['error' => $data->errors()], 400);
+        }
+
+        $user->password = bcrypt($request->input('password'));
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password updated successfully.',
+            'user' => $user
         ]);
     }
 

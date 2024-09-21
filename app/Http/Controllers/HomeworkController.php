@@ -20,6 +20,7 @@ class HomeworkController extends Controller
             'the_day' => 'required',
             'Subject' => 'required',
             'homework' => 'required',
+            'Lesson_Name' => 'required',
             'category_id' => 'required'
         ]);
 
@@ -52,6 +53,10 @@ class HomeworkController extends Controller
 
         if ($request->has('homework')) {
             $homework->homework = $updatedFields['homework'];
+        }
+
+        if ($request->has('Lesson_Name')) {
+            $homework->homework = $updatedFields['Lesson_Name'];
         }
 
         if ($request->has('category_id')) {
@@ -100,6 +105,7 @@ class HomeworkController extends Controller
                 'day' => $homework->the_day,
                 'subject' => $homework->Subject,
                 'homework' => $homework->homework,
+                'Lesson_Name' => $homework->Lesson_Name,
                 'category' => $category->name,
                 'date' => $homework->created_at->format('Y-m-d'),
             ];

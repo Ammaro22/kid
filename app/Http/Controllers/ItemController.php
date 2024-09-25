@@ -132,4 +132,41 @@ class ItemController extends Controller
             'message' => 'Item deleted successfully.',
         ], 200);
     }
+
+    /*عرض البنود بالنسبة للاهل*/
+    public function getItemsforparent(Request $request)
+    {
+
+        try {
+
+            $user = auth()->user();
+            $userRole = auth()->user()->role_id;
+            if ($userRole !== 4) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            $student = $user->Student;
+
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No student associated with this user.',
+                ], 404);
+            }
+
+
+            $items = Item::all();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Items retrieved successfully.',
+                'data' => $items,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving items: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

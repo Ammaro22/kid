@@ -40,7 +40,7 @@ Route::group(["middleware"=>["auth:api"]],function (){
 
 });
 /*تغير كلمة سر المديرة*/
-Route::post('update_password_admin',[UserController::class,'updatePassword'])->middleware('auth:api');
+Route::post('update_password_admin',[UserController::class,'updatePassword']);
 /*عرض كل المعلمات*/
 Route::post('admin_update_techer/{id}',[UserController::class,'updateteacher'])->middleware('auth:api');
 Route::post('show_all_techer',[UserController::class,'getallteacher'])->middleware('auth:api');
@@ -167,4 +167,5 @@ Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->mid
 Route::post('create_item',[ItemController::class,'createItem'])->middleware('auth:api');
 Route::post('update_item/{id}',[ItemController::class,'updateItem'])->middleware('auth:api');
 Route::get('get_item',[ItemController::class,'getItems']);
+Route::get('get_item_for_parent',[ItemController::class,'getItemsforparent'])->middleware('auth:api');
 Route::delete('delete_item/{id}',[ItemController::class,'deleteItem'])->middleware('auth:api');

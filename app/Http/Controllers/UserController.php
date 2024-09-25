@@ -21,12 +21,12 @@ class UserController extends BaseController
             'last_name' => 'required|string|max:255',
             'password' => 'required|string|min:4|max:15',
             'phone' => 'required|string|max:10|min:10',
-            'age' => 'string',
+            'age' => 'nullable|string',
             'image' => 'image',
-            'certificate' => 'string',
-            'Previous_places_work' => 'string',
-            'Experience' => 'string',
-            'salary' => 'string',
+            'certificate' => 'nullable|string',
+            'Previous_places_work' => 'nullable|string',
+            'Experience' => 'nullable|string',
+            'salary' => 'nullable|string',
             'role_id'
         ]);
 
@@ -268,13 +268,8 @@ class UserController extends BaseController
 
     public function updatePassword(Request $request)
     {
-        $userRole = auth()->user()->role_id;
-        if ($userRole !== 1 ) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-        $user = auth()->user();
-
         $data = Validator::make($request->all(), [
+            'phone' => 'required|string',
             'password' => 'required|string|min:4',
         ]);
 
@@ -282,12 +277,19 @@ class UserController extends BaseController
             return response()->json(['error' => $data->errors()], 400);
         }
 
+        $user = User::where('phone', $request->input('phone'))->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+
         $user->password = bcrypt($request->input('password'));
         $user->save();
 
         return response()->json([
             'message' => 'Password updated successfully.',
-            'user' => $user
+
         ]);
     }
 

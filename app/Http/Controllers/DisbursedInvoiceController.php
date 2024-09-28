@@ -113,6 +113,7 @@ class DisbursedInvoiceController extends Controller
                             'price' => $invoice->price,
                             'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
                         ];
+                        
                     })->values()->all(),
                 ];
             })

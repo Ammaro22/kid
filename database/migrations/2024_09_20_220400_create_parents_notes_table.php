@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('parents_notes', function (Blueprint $table) {
             $table->id();
-
+            $table->string('parent_note')->nullable();
+            $table->string('teacher_response')->nullable();
+            $table->string('student_name')->nullable();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('homework_id')->constrained('homework')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('parents_notes');

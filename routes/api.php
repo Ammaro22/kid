@@ -10,6 +10,7 @@ use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\ParentsNoteController;
 use App\Http\Controllers\PermanentProgramController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\RecordOrderController;
@@ -163,9 +164,22 @@ Route::post('update_homework/{id}',[HomeworkController::class,'update'])->middle
 Route::get('get_homework/{id}',[HomeworkController::class,'show']);
 Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->middleware('auth:api');
 
+/*استفسارات الاهل*/
+Route::post('create_parent_note',[ParentsNoteController::class,'createParentNote'])->middleware('auth:api');
+Route::post('update_parent_note/{parent_note_id}',[ParentsNoteController::class,'updateParentNote'])->middleware('auth:api');
+Route::get('get_parent_note_for_parent',[ParentsNoteController::class,'getParentNotesForToday'])->middleware('auth:api');
+Route::delete('delete_parent_note/{id}',[ParentsNoteController::class,'deleteParentNote'])->middleware('auth:api');
+
+/*رد المعلمة*/
+Route::post('create_teacher_response/{parent_note_id}',[ParentsNoteController::class,'createTeacherResponse'])->middleware('auth:api');
+Route::get('get_parent_note',[ParentsNoteController::class,'getParentNotes'])->middleware('auth:api');
+
+
 /*البنود*/
 Route::post('create_item',[ItemController::class,'createItem'])->middleware('auth:api');
 Route::post('update_item/{id}',[ItemController::class,'updateItem'])->middleware('auth:api');
 Route::get('get_item',[ItemController::class,'getItems']);
 Route::get('get_item_for_parent',[ItemController::class,'getItemsforparent'])->middleware('auth:api');
 Route::delete('delete_item/{id}',[ItemController::class,'deleteItem'])->middleware('auth:api');
+
+

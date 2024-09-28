@@ -43,6 +43,10 @@ class User extends Authenticatable
     public function appointments(){
         return $this->hasMany(Appointment::class,'user_id');
     }
+    ///////////////////////////////////
+    public function parent_note(){
+        return $this->hasMany(Parents_note::class,'user_id');
+    }
     /////////////////////////////////////////////////////////
     public function Student(){
         return $this->hasOne(Student::class,'user_id');

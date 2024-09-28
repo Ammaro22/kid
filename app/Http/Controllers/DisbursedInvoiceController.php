@@ -152,6 +152,7 @@ class DisbursedInvoiceController extends Controller
                 'price' => $invoice->price,
                 'invoice_type_id' => $invoice->invoice_type_id,
                 'invoice_type_name' => $invoice->invoice_ty->name,
+                'description' => $invoice->invoice_ty->description,
                 'created_at' => $invoice->created_at->format('Y-m-d'),
             ];
         });
@@ -191,7 +192,7 @@ class DisbursedInvoiceController extends Controller
         $totalInvoices = Invoice::whereYear('created_at', $year)->sum('batch');
         $profitAmount = $totalInvoices - $grandTotal;
 
-        // Create the profit record
+
         $profit = Profit::create(['profits' => $profitAmount, 'year' => $year]);
 
         return response()->json([

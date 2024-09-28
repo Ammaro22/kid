@@ -73,6 +73,7 @@ class HomeworkController extends Controller
 
     public function show(Request $request, $category_id)
     {
+
         $category = Category::find($category_id);
 
         if (!$category) {
@@ -84,21 +85,32 @@ class HomeworkController extends Controller
         }
 
 
-        $currentDate = now()->format('Y-m-d');
+        $request->validate([
+            'day' => 'required|integer|min:1|max:31',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:1900|max:2100',
+        ]);
+
+        $day = $request->input('day');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $inputDate = "{$year}-{$month}-{$day}";
 
 
         $homeworks = Homework::where('category_id', $category_id)
-            ->whereDate('created_at', $currentDate)
+            ->whereDate('created_at', $inputDate)
             ->orderByDesc('created_at')
             ->get();
 
         if ($homeworks->isEmpty()) {
             return response()->json([
                 'status' => false,
-                'message' => 'No homeworks found for the specified category on the current date.',
+                'message' => 'No homeworks found for the specified category on the specified date.',
                 'data' => []
             ], 404);
         }
+
 
         $data = $homeworks->map(function ($homework) use ($category) {
             return [

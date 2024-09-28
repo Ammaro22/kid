@@ -13,7 +13,8 @@ class Disbursed_invoice extends Model
     public $timestamps = true;
     protected $fillable = [
         'price',
-        'invoice_type_id'
+        'invoice_type_id',
+        'description'
 
     ];
     public function invoice_ty(){

@@ -13,7 +13,7 @@ class invoice_type extends Model
     public $timestamps = true;
     protected $fillable = [
         'name',
-        'description'
+
     ];
     public function d_invoice(){
         return $this->hasMany(Disbursed_invoice::class,'invoice_type_id');

@@ -162,6 +162,7 @@ Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::clas
 Route::post('create_homework',[HomeworkController::class,'store'])->middleware('auth:api');
 Route::post('update_homework/{id}',[HomeworkController::class,'update'])->middleware('auth:api');
 Route::get('get_homework/{id}',[HomeworkController::class,'show']);
+Route::get('get_homework_now/{id}',[HomeworkController::class,'shownow']);
 Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->middleware('auth:api');
 
 /*استفسارات الاهل*/

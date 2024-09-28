@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->double('price');
             $table->foreignId('invoice_type_id')->constrained('invoice_types')->cascadeOnDelete();
+            $table->string('description');
             $table->timestamps();
         });
     }

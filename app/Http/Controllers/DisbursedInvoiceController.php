@@ -34,7 +34,7 @@ class DisbursedInvoiceController extends Controller
         $disbursedInvoiceData = [
             'price' => $validatedData['price'],
             'invoice_type_id' => $validatedData['invoice_type_id'],
-            'description' => $validatedData['description'] ?? null,
+            'description' => $validatedData['description'] ,
         ];
 
         $disbursedInvoice = Disbursed_invoice::create($disbursedInvoiceData);
@@ -113,7 +113,7 @@ class DisbursedInvoiceController extends Controller
                             'price' => $invoice->price,
                             'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
                         ];
-                        
+
                     })->values()->all(),
                 ];
             })
@@ -153,7 +153,7 @@ class DisbursedInvoiceController extends Controller
                 'price' => $invoice->price,
                 'invoice_type_id' => $invoice->invoice_type_id,
                 'invoice_type_name' => $invoice->invoice_ty->name,
-                'description' => $invoice->invoice_ty->description,
+                'description' => $invoice->description,
                 'created_at' => $invoice->created_at->format('Y-m-d'),
             ];
         });

@@ -71,6 +71,56 @@ class HomeworkController extends Controller
         ]);
     }
 
+    public function shownow(Request $request, $category_id)
+    {
+
+        $category = Category::find($category_id);
+
+        if (!$category) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Category not found.',
+                'data' => []
+            ], 404);
+        }
+
+
+        $currentDate = now()->format('Y-m-d');
+
+
+
+        $homeworks = Homework::where('category_id', $category_id)
+            ->whereDate('created_at', $currentDate)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($homeworks->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No homeworks found for the specified category on the specified date.',
+                'data' => []
+            ], 404);
+        }
+
+
+        $data = $homeworks->map(function ($homework) use ($category) {
+            return [
+                'day' => $homework->the_day,
+                'subject' => $homework->Subject,
+                'homework' => $homework->homework,
+                'Lesson_Name' => $homework->Lesson_Name,
+                'category' => $category->name,
+                'date' => $homework->created_at->format('Y-m-d'),
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Homeworks retrieved successfully.',
+            'data' => $data
+        ]);
+    }
+
     public function show(Request $request, $category_id)
     {
 

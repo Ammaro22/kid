@@ -126,8 +126,8 @@ Route::post('show__evaluationstudent_by_month/{id}',[EvaluationController::class
 Route::post('show__evaluationstudent_by_category/{id}',[EvaluationController::class,'getEvaluationsByCategoryId']);
 /*عرض تقييمات الطفل بالنسبة للاهل*/
 Route::post('show__evaluationstudent_by_day_for_parent',[EvaluationController::class,'showEvaluationsforparent'])->middleware('auth:api');
-Route::post('show__evaluationstudent_by_month_for_parent',[EvaluationController::class,'showEvaluationsforparentmonth'])->middleware('auth:api');
-
+Route::post('show__evaluationstudent_by_month_for_parent_now',[EvaluationController::class,'showEvaluationsforparentmonth'])->middleware('auth:api');
+Route::post('show__evaluationstudent_by_month_for_parent',[EvaluationController::class,'showEvaluationsforparentmonth2'])->middleware('auth:api');
 /*أضافة او تعديل الملاحظة التي تضيفها المديرة للطالب*/
 Route::post('update_note_sudent/{id}',[NoteController::class,'updateNoteAdmin'])->middleware('auth:api');
 
@@ -139,8 +139,8 @@ Route::get('show_attendance_status_for_student/{id}',[AttendanceController::clas
 Route::get('get_Student_Attendance_History/{id}',[AttendanceController::class,'getStudentAttendanceHistory'])->middleware('auth:api');
 /*عرض حضور الطالب لاهله*/
 Route::get('get_Student_Attendance_History_for_parent_by_day',[AttendanceController::class,'getmyStudentAttendanceHistoryday'])->middleware('auth:api');
-Route::get('get_Student_Attendance_History_for_parent_by_month',[AttendanceController::class,'getmyStudentAttendanceHistorymonth'])->middleware('auth:api');
-
+Route::get('get_Student_Attendance_History_for_parent_by_month_now',[AttendanceController::class,'getmyStudentAttendanceHistorymonth'])->middleware('auth:api');
+Route::get('get_Student_Attendance_History_for_parent_by_month',[AttendanceController::class,'getmyStudentAttendanceHistorymonth2'])->middleware('auth:api');
 //////////////////حضور المعلمات/////////////////
 Route::get('make_attendance_for_teacher',[AttendanceController::class,'recordAttendance'])->middleware('auth:api');
 

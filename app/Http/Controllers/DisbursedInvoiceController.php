@@ -34,7 +34,7 @@ class DisbursedInvoiceController extends Controller
         $disbursedInvoiceData = [
             'price' => $validatedData['price'],
             'invoice_type_id' => $validatedData['invoice_type_id'],
-            'description' => $validatedData['description'] ,
+            'description' => $validatedData['description'] ?? null ,
         ];
 
         $disbursedInvoice = Disbursed_invoice::create($disbursedInvoiceData);

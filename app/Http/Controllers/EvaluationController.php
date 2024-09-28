@@ -404,6 +404,81 @@ class EvaluationController extends Controller
         }
     }
 
+    public function showEvaluationsForParentMonth2(Request $request)
+    {
+
+        $month = $request->input('month');
+        $year = $request->input('year');
+        $studentName = $request->input('student_name');
+        $className = $request->input('class_name');
+        $userId = auth()->id();
+
+
+        if (!$month || !$year) {
+            return response()->json(['message' => 'Please provide both month and year.'], 400);
+        }
+
+
+        $student = Student::whereHas('category', function ($query) use ($className) {
+            $query->where('name', $className);
+        })
+            ->where('name', $studentName)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        $studentId = $student->id;
+        $images = Image_child::where('student_id', $studentId)->get();
+
+
+        $evaluations = $student->evaluation1->filter(function ($evaluation) use ($month, $year) {
+            return $evaluation->created_at->format('m') == $month && $evaluation->created_at->format('Y') == $year;
+        });
+
+        $noteIds = $evaluations->pluck('note_id');
+        $notes = Note::whereIn('id', $noteIds)->get();
+
+
+        $groupedEvaluations = $evaluations->groupBy(function ($evaluation) {
+            return $evaluation->created_at->format('Y-m-d');
+        });
+
+        $evaluationDaysCount = $groupedEvaluations->keys()->count();
+
+        $output = [
+            'student_name' => $student->name,
+            'class_name' => $student->category->name,
+            'evaluation_days_count' => $evaluationDaysCount,
+            'evaluations' => $groupedEvaluations->map(function ($evaluationsByDate) use ($notes) {
+                $note = $notes->firstWhere('id', $evaluationsByDate->first()->note_id);
+                return [
+                    'date' => $evaluationsByDate->first()->created_at->format('Y-m-d'),
+                    'note_teacher' => $note ? $note->note_teacher : null,
+                    'note_admin' => $note ? $note->note_admin : null,
+                    'evaluations' => $evaluationsByDate->map(function ($evaluation) {
+                        return [
+                            'id' => $evaluation->id,
+                            'evaluation' => $evaluation->evaluation,
+                            'subject_name' => $evaluation->subject1->name,
+                        ];
+                    })->values()->toArray(),
+                ];
+            })->values()->toArray(),
+            'images' => $images->toArray(),
+        ];
+
+
+        if ($evaluations->isNotEmpty()) {
+            return response()->json($output);
+        } else {
+            return response()->json(['message' => 'Evaluation not found'], 404);
+        }
+    }
+
+
 
 
 

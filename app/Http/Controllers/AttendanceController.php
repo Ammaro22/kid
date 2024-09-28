@@ -274,6 +274,73 @@ class AttendanceController extends Controller
         }
     }
 
+    public function getmyStudentAttendanceHistorymonth2(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $studentName = $request->input('student_name');
+            $month = $request->input('month');
+            $year = $request->input('year');
+
+
+            if ( !$month || !$year) {
+                return response()->json(['message' => 'Please provide a valid day, month, and year.'], 400);
+            }
+
+            try {
+
+                $theDate = Carbon::create($year, $month, );
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Please provide a valid date.'], 400);
+            }
+
+            $student = $user->Student()->where('name', 'like', "%$studentName%")->first();
+
+            if (!$student) {
+                return response()->json(['message' => 'No student record found for the provided name.'], 404);
+            }
+
+
+            $attendance = $student->attendance()
+                ->whereMonth('the_date', '=', $theDate->month)
+                ->whereYear('the_date', '=', $theDate->year)
+                ->get();
+
+            if ($attendance->isEmpty()) {
+                return response()->json(['message' => 'No attendance records found for the provided student and date.'], 404);
+            }
+
+            $attendanceHistory = $attendance->map(function ($record) {
+                return [
+                    'the_date' => Carbon::parse($record->the_date)->format('Y-m-d'),
+                    'status' => $record->status,
+                ];
+            });
+
+
+            $studentData = [
+                'name' => $student->name,
+                'category_name' => $student->category->name,
+                'images' => $student->image_c()->get()->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'name' => $image->name,
+                        'path' => $image->path,
+                    ];
+                }),
+            ];
+
+            return response()->json([
+                'student' => $studentData,
+                'student_attendance_history' => $attendanceHistory
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching the student attendance history.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
     ////////////////////////////////المعلمات////////////////////////////////
     public function recordAttendance(Request $request)
     {

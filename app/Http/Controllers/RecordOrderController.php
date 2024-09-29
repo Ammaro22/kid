@@ -176,7 +176,7 @@ class RecordOrderController extends Controller
 
         $category = Category::find($student->category_id);
         $categoryName = $category ? $category->name : 'Unknown';
-        $studentImages = Image_child::where('student_id', $student->id)->get();
+        $studentImages = Image_student::where('student_id', $student->id)->get();
         $recordData = [
             'id' => $record->id,
             'student_name' => $student->name,

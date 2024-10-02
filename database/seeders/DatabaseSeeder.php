@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             RoleSeeder::class,
             InvoiceTypeSeeder::class,
+            EvaluationSeeder::class,
         ]);
 
     }

@@ -106,6 +106,7 @@ class HomeworkController extends Controller
         $data = $homeworks->map(function ($homework) use ($category) {
             return [
                 'day' => $homework->the_day,
+                'id' => $homework->id,
                 'subject' => $homework->Subject,
                 'homework' => $homework->homework,
                 'Lesson_Name' => $homework->Lesson_Name,

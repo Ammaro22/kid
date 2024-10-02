@@ -69,6 +69,10 @@ class User extends Authenticatable
     public function attendanceT(){
         return $this->hasMany(AttendanceT::class,'user_id');
     }
+
+    public function evaluation_teacher(){
+        return $this->hasMany(Evaluation_Teacher::class,'user_id');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

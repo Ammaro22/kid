@@ -234,6 +234,9 @@ class ParentsNoteController extends Controller
                         'subject' => $note->homework->Subject,
                         'lesson_name' => $note->homework->Lesson_Name,
                     ],
+                    'user'=>[
+                      'image'=>$note->user->image
+                    ],
                     'created_at' => $note->created_at->format('Y-m-d'),
                     ]; });
 

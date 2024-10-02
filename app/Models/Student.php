@@ -59,6 +59,11 @@ class Student extends Model
     public function Record(){
         return $this->hasMany(Record_order::class,'student_id');
     }
+
+    public function Evaluation_student(){
+        return $this->hasMany(Evaluation_student::class,'student_id');
+    }
+
     public function image_c(){
         return $this->hasMany(Image_child::class,'student_id');
     }

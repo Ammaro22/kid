@@ -6,6 +6,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClassSupervisorController;
 use App\Http\Controllers\DisbursedInvoiceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\EvaluationTeacherController;
 use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ItemController;
@@ -30,7 +31,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 /*المستخدم*/
+
 Route::post('signup',[UserController::class,'signup']);
 Route::post('login', [UserController::class, 'login']);
 Route::delete('user_delete/{id}',[UserController::class,'destroy']);
@@ -40,6 +43,7 @@ Route::group(["middleware"=>["auth:api"]],function (){
     Route::post('user_update',[UserController::class,'update']);
 
 });
+
 /*تغير كلمة سر المديرة*/
 Route::post('update_password_admin',[UserController::class,'updatePassword']);
 /*عرض كل المعلمات*/
@@ -131,6 +135,7 @@ Route::post('show__evaluationstudent_by_month_for_parent',[EvaluationController:
 /*أضافة او تعديل الملاحظة التي تضيفها المديرة للطالب*/
 Route::post('update_note_sudent/{id}',[NoteController::class,'updateNoteAdmin'])->middleware('auth:api');
 
+Route::post('Weekly_Review_Offer_by_Month',[EvaluationController::class,'getEvaluationsByStudentAndDate']);
 
 //////////////////حضور الطلاب/////////////////
 Route::post('add_attendance',[AttendanceController::class,'add'])->middleware('auth:api');
@@ -161,7 +166,7 @@ Route::delete('delete_disbursed_invoices/{id}',[DisbursedInvoiceController::clas
 /*الوظيفة*/
 Route::post('create_homework',[HomeworkController::class,'store'])->middleware('auth:api');
 Route::post('update_homework/{id}',[HomeworkController::class,'update'])->middleware('auth:api');
-Route::get('get_homework/{id}',[HomeworkController::class,'show']);
+Route::post('get_homework/{id}',[HomeworkController::class,'show']);
 Route::get('get_homework_now/{id}',[HomeworkController::class,'shownow']);
 Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->middleware('auth:api');
 
@@ -183,4 +188,9 @@ Route::get('get_item',[ItemController::class,'getItems']);
 Route::get('get_item_for_parent',[ItemController::class,'getItemsforparent'])->middleware('auth:api');
 Route::delete('delete_item/{id}',[ItemController::class,'deleteItem'])->middleware('auth:api');
 
-
+/*تقيم المعلمات*/
+Route::post('create_evaluation_teacher',[EvaluationTeacherController::class,'createTeacherEvaluation'])->middleware('auth:api');
+Route::post('update_evaluation_teacher/{evaluation_teacher_id}',[EvaluationTeacherController::class,'updateTeacherEvaluation'])->middleware('auth:api');
+Route::post('get_evaluation_teacher_to_admin/{user_id}',[EvaluationTeacherController::class,'showTeacherEvaluations'])->middleware('auth:api');
+Route::post('get_evaluation_teacher_to_teacher',[EvaluationTeacherController::class,'showTeacherEvaluationstoteacher'])->middleware('auth:api');
+Route::delete('delete_evaluation/{id}',[EvaluationTeacherController::class,'deleteTeacherEvaluation'])->middleware('auth:api');

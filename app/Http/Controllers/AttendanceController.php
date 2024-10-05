@@ -165,7 +165,7 @@ class AttendanceController extends Controller
 
     /* عرض حضور الطالب بالنسبة لاهله*/
 
-    public function getmyStudentAttendanceHistoryday(Request $request)
+    public function getmyStudentAttendanceHistorydaynow(Request $request)
     {
         try {
             $user = $request->user();
@@ -203,6 +203,69 @@ class AttendanceController extends Controller
                         'id' => $image->id,
                         'name'=>$image->name,
                         'path' => $image->path, ]; }),
+            ];
+
+            return response()->json([
+                'student' => $studentData,
+                'student_attendance_history' => $attendanceHistory
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching student attendance history.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getmyStudentAttendanceHistoryday(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $studentName = $request->input('student_name');
+
+            // الحصول على المدخلات الخاصة باليوم والشهر والسنة
+            $day = $request->input('day');
+            $month = $request->input('month');
+            $year = $request->input('year');
+
+            // التحقق من أن جميع المدخلات موجودة
+            if (!$day || !$month || !$year) {
+                return response()->json(['message' => 'Day, month, and year are required.'], 400);
+            }
+
+            // إنشاء التاريخ من المدخلات
+            $theDate = Carbon::createFromDate($year, $month, $day)->format('Y-m-d');
+
+            // البحث عن الطالب
+            $student = $user->Student()->where('name', 'like', "%$studentName%")->first();
+
+            if (!$student) {
+                return response()->json(['message' => 'No student record found for the given student name.'], 404);
+            }
+
+            // الحصول على سجلات الحضور
+            $attendance = $student->attendance()->where('the_date', $theDate)->get();
+
+            if ($attendance->isEmpty()) {
+                return response()->json(['message' => 'No attendance records found for the given student and date.'], 404);
+            }
+
+            // معالجة سجلات الحضور
+            $attendanceHistory = $attendance->map(function ($record) {
+                return [
+                    'the_date' => $record->the_date,
+                    'status' => $record->status,
+                ];
+            });
+
+            // بيانات الطالب
+            $studentData = [
+                'name' => $student->name,
+                'category_name' => $student->category->name,
+                'images' => $student->image_c()->get()->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'name' => $image->name,
+                        'path' => $image->path,
+                    ];
+                }),
             ];
 
             return response()->json([

@@ -143,6 +143,7 @@ Route::get('show_attendance_status_all_student',[AttendanceController::class,'ge
 Route::get('show_attendance_status_for_student/{id}',[AttendanceController::class,'getStudentAttendance'])->middleware('auth:api');
 Route::get('get_Student_Attendance_History/{id}',[AttendanceController::class,'getStudentAttendanceHistory'])->middleware('auth:api');
 /*عرض حضور الطالب لاهله*/
+Route::get('get_Student_Attendance_History_for_parent_by_day_now',[AttendanceController::class,'getmyStudentAttendanceHistorydaynow'])->middleware('auth:api');
 Route::get('get_Student_Attendance_History_for_parent_by_day',[AttendanceController::class,'getmyStudentAttendanceHistoryday'])->middleware('auth:api');
 Route::get('get_Student_Attendance_History_for_parent_by_month_now',[AttendanceController::class,'getmyStudentAttendanceHistorymonth'])->middleware('auth:api');
 Route::get('get_Student_Attendance_History_for_parent_by_month',[AttendanceController::class,'getmyStudentAttendanceHistorymonth2'])->middleware('auth:api');

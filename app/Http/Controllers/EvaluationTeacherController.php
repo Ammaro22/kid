@@ -9,35 +9,7 @@ use Illuminate\Routing\Controller;
 
 class EvaluationTeacherController extends Controller
 {
-//    public function createTeacherEvaluation(Request $request)
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 1 && $userRole !== 2 ) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//
-//        $request->validate([
-//            'user_id' => 'required|exists:users,id',
-//            'evaluation' => 'required|string',
-//            'note' => 'nullable|string',
-//            'evaluation_criterias_id' => 'required|exists:evaluation__criterias,id',
-//        ]);
-//
-//
-//        $evaluation = Evaluation_Teacher::create([
-//            'user_id' => $request->input('user_id'),
-//            'evaluation' => $request->input('evaluation'),
-//            'note' => $request->input('Note'),
-//            'evaluation_criterias_id' => $request->input('evaluation_criterias_id'),
-//        ]);
-//
-//
-//        return response()->json([
-//            'status' => true,
-//            'message' => 'Evaluation created successfully.',
-//            'data' => $evaluation,
-//        ], 201);
-//    }
+
 
     public function createTeacherEvaluation(Request $request)
     {

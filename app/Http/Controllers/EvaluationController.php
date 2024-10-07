@@ -176,35 +176,58 @@ class EvaluationController extends Controller
         return response()->json(['message' => 'Evaluations updated successfully']);
     }
 
-
-
-    public function deleteEvaluation(Request $request, $studentId)
+    public function delete_Evaluation(Request $request)
     {
         $userRole = auth()->user()->role_id;
         if ($userRole !== 3) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $student = Student::findOrFail($studentId);
+        $studentId = $request->input('student_id');
+        $day = $request->input('day');
+        $month = $request->input('month');
+        $year = $request->input('year');
 
+        if (!$studentId || !$day || !$month || !$year) {
+            return response()->json(['message' => 'Student ID, day, month, and year are required.'], 400);
+        }
 
-        $evaluations = $student->evaluation1()->get();
+        $student = Student::find($studentId);
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
 
-        if ($evaluations->isNotEmpty()) {
-            foreach ($evaluations as $evaluation) {
+        $date = Carbon::createFromDate($year, $month, $day)->toDateString();
 
-                if ($evaluation->note1) {
+        $evaluations = $student->evaluation1()
+            ->whereDate('created_at', $date)
+            ->get();
 
-                    $evaluation->note1->delete();
+        $studentEvaluations = $student->Evaluation_student()
+            ->whereDate('created_at', $date)
+            ->get();
+
+        try {
+
+            if ($evaluations->isNotEmpty()) {
+                foreach ($evaluations as $evaluation) {
+                    if ($evaluation->note1) {
+                        $evaluation->note1->delete();
+                    }
+                    $evaluation->delete();
                 }
-
-
-                $evaluation->delete();
             }
 
-            return response()->json(['message' => 'تم حذف التقييمات والملاحظات المرتبطة بها بنجاح']);
-        } else {
-            return response()->json(['message' => 'لا توجد تقييمات لحذفها'], 404);
+            
+            if ($studentEvaluations->isNotEmpty()) {
+                foreach ($studentEvaluations as $studentEvaluation) {
+                    $studentEvaluation->delete();
+                }
+            }
+
+            return response()->json(['message' => 'The evaluations and their associated notes have been successfully deleted.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while deleting evaluations.'], 500);
         }
     }
 
@@ -523,10 +546,10 @@ class EvaluationController extends Controller
                     })->values()->toArray(),
                 ];
             })->values()->toArray(),
-            'evaluation_students' => $evaluationStudents->map(function ($evaluationStudent,$index) {
+            'evaluation_students' => $evaluationStudents->map(function ($evaluationStudent) {
                 return [
                     'id' => $evaluationStudent->id,
-                    'Weekly_Evaluation_' . ($index + 1) => $evaluationStudent->Evaluation,
+                    'Weekly_Evaluation' => $evaluationStudent->Evaluation,
                     'created_at' => $evaluationStudent->created_at->format('Y-m-d H:i:s'),
                 ];
             })->values()->toArray(),
@@ -606,10 +629,10 @@ class EvaluationController extends Controller
                     })->values()->toArray(),
                 ];
             })->values()->toArray(),
-            'evaluation_students' => $evaluationStudents->map(function ($evaluationStudent,$index) {
+            'evaluation_students' => $evaluationStudents->map(function ($evaluationStudent) {
                 return [
                     'id' => $evaluationStudent->id,
-                    'Weekly_Evaluation_' . ($index + 1) => $evaluationStudent->Evaluation,
+                    'Weekly_Evaluation' => $evaluationStudent->Evaluation,
                     'created_at' => $evaluationStudent->created_at->format('Y-m-d H:i:s'),
                 ];
             })->values()->toArray(),

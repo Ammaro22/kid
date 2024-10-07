@@ -6,6 +6,7 @@ use App\Models\Homework;
 use App\Models\Parents_note;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Carbon;
 
 class ParentsNoteController extends Controller
 {
@@ -89,19 +90,74 @@ class ParentsNoteController extends Controller
         }
     }
 
+//    public function getParentNotesForToday(Request $request)
+//    {
+//        $userId = auth()->user()->id;
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 4) {
+//            return response()->json(['message' => 'Unauthorized'], 401);
+//        }
+//        try {
+//
+//            $today = now()->toDateString();
+//            $parentNotes = Parents_note::where('user_id', $userId)
+//                ->whereDate('created_at', $today)
+//                ->get();
+//
+//            $detailedNotes = $parentNotes->map(function ($note) {
+//                return [
+//                    'id' => $note->id,
+//                    'teacher_response' => $note->teacher_response,
+//                    'parent_note' => $note->parent_note,
+//                    'created_at' => $note->created_at->format('Y-m-d'),
+//                    'homework' => [
+//                        'id' => $note->homework->id,
+//                        'subject' => $note->homework->Subject,
+//                        'lesson_name' => $note->homework->Lesson_Name,
+//                        'description'=>$note->homework->homework,
+//                    ],
+//
+//                ]; });
+//
+//            return response()->json([
+//                'success' => true,
+//                'message' => 'Parent notes retrieved successfully',
+//                'data' => $detailedNotes
+//            ], 200);
+//
+//        } catch (\Exception $e) {
+//            return response()->json([
+//                'success' => false,
+//                'message' => 'Error retrieving parent notes: ' . $e->getMessage(),
+//            ], 500);
+//        }
+//    }
     public function getParentNotesForToday(Request $request)
     {
         $userId = auth()->user()->id;
         $userRole = auth()->user()->role_id;
+
+        // تحقق من الدور
         if ($userRole !== 4) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        try {
 
+        try {
             $today = now()->toDateString();
-            $parentNotes = Parents_note::where('user_id', $userId)
-                ->whereDate('created_at', $today)
-                ->get();
+
+
+            $studentName = $request->input('student_name');
+
+
+            $parentNotesQuery = Parents_note::where('user_id', $userId)
+                ->whereDate('created_at', $today);
+
+
+            if ($studentName) {
+                $parentNotesQuery->where('student_name', 'like', "%$studentName%");
+            }
+
+            $parentNotes = $parentNotesQuery->get();
 
             $detailedNotes = $parentNotes->map(function ($note) {
                 return [
@@ -113,10 +169,74 @@ class ParentsNoteController extends Controller
                         'id' => $note->homework->id,
                         'subject' => $note->homework->Subject,
                         'lesson_name' => $note->homework->Lesson_Name,
-                        'description'=>$note->homework->homework,
+                        'description' => $note->homework->homework,
                     ],
+                ];
+            });
 
-                ]; });
+            return response()->json([
+                'success' => true,
+                'message' => 'Parent notes retrieved successfully',
+                'data' => $detailedNotes
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving parent notes: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getParentNotesForDate(Request $request)
+    {
+        $userId = auth()->user()->id;
+        $userRole = auth()->user()->role_id;
+
+
+        if ($userRole !== 4) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+
+            $day = $request->input('day');
+            $month = $request->input('month');
+            $year = $request->input('year');
+
+
+            if (!$day || !$month || !$year) {
+                return response()->json(['message' => 'Day, month, and year are required.'], 400);
+            }
+
+
+            $date = Carbon::createFromDate($year, $month, $day)->toDateString();
+
+            $studentName = $request->input('student_name');
+
+            $parentNotesQuery = Parents_note::where('user_id', $userId)
+                ->whereDate('created_at', $date);
+
+            if ($studentName) {
+                $parentNotesQuery->where('student_name', 'like', "%$studentName%");
+            }
+
+            $parentNotes = $parentNotesQuery->get();
+
+            $detailedNotes = $parentNotes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'teacher_response' => $note->teacher_response,
+                    'parent_note' => $note->parent_note,
+                    'created_at' => $note->created_at->format('Y-m-d'),
+                    'homework' => [
+                        'id' => $note->homework->id,
+                        'subject' => $note->homework->Subject,
+                        'lesson_name' => $note->homework->Lesson_Name,
+                        'description' => $note->homework->homework,
+                    ],
+                ];
+            });
 
             return response()->json([
                 'success' => true,

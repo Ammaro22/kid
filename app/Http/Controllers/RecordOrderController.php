@@ -41,6 +41,54 @@ class RecordOrderController extends Controller
         ]);
     }
 
+//    public function acceptrecord($id)
+//    {
+//        $userRole = auth()->user()->role_id;
+//        if ($userRole !== 1 && $userRole !== 2) {
+//            abort(403, 'Unauthorized access');
+//        }
+//
+//        $record = Record_order::find($id);
+//        if (!$record) {
+//            abort(404, 'Record order not found');
+//        }
+//
+//        $studentBeforeAccept = Student_before_accept::find($record->student_id);
+//        if (!$studentBeforeAccept) {
+//            abort(404, 'Student record not found');
+//        }
+//
+//        $student = $record->student1;
+//        if (!$student) {
+//            $student = new Student();
+//            $student->fill($studentBeforeAccept->toArray());
+//            $student->record_order_id = $record->id;
+//            $student->save();
+//
+//
+//            foreach ($studentBeforeAccept->image_s as $image) {
+//                $student->image_c()->create([
+//                    'name' => $image->name,
+//                    'path' => $image->path,
+//                    'student_id' => $student->id,
+//                ]);
+//            }
+//        } else {
+//            $student->update($studentBeforeAccept->toArray());
+//            foreach ($studentBeforeAccept->image_s as $image) {
+//                $student->image_c()->create([
+//                    'name' => $image->name,
+//                    'path' => $image->path,
+//                    'student_id' => $student->id,
+//                ]);
+//            }
+//        }
+//
+//        $record->accept = true;
+//        $record->save();
+//
+//        return response()->json(['message' => 'Successfully accepted record']);
+//    }
     public function acceptrecord($id)
     {
         $userRole = auth()->user()->role_id;
@@ -57,35 +105,39 @@ class RecordOrderController extends Controller
         if (!$studentBeforeAccept) {
             abort(404, 'Student record not found');
         }
-
         $student = $record->student1;
         if (!$student) {
+
             $student = new Student();
             $student->fill($studentBeforeAccept->toArray());
             $student->record_order_id = $record->id;
             $student->save();
 
-            // Transfer images from image_student to image_children
+
             foreach ($studentBeforeAccept->image_s as $image) {
-                $student->image_c()->create([
-                    'name' => $image->name,
-                    'path' => $image->path,
-                    'student_id' => $student->id,
-                ]);
+                if ($student->id) {
+                    $student->image_c()->create([
+                        'name' => $image->name,
+                        'path' => $image->path,
+                        'student_id' => $student->id,
+                    ]);
+                }
             }
         } else {
+
             $student->update($studentBeforeAccept->toArray());
 
-            // Transfer images from image_student to image_children
+
             foreach ($studentBeforeAccept->image_s as $image) {
-                $student->image_c()->create([
-                    'name' => $image->name,
-                    'path' => $image->path,
-                    'student_id' => $student->id,
-                ]);
+                if ($student->id) {
+                    $student->image_c()->create([
+                        'name' => $image->name,
+                        'path' => $image->path,
+                        'student_id' => $student->id,
+                    ]);
+                }
             }
         }
-
         $record->accept = true;
         $record->save();
 

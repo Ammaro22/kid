@@ -6,10 +6,10 @@ use App\Models\Evaluation_Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Carbon;
 
 class EvaluationTeacherController extends Controller
 {
-
 
     public function createTeacherEvaluation(Request $request)
     {
@@ -28,8 +28,23 @@ class EvaluationTeacherController extends Controller
 
         $evaluationsData = $request->input('evaluations');
         $createdEvaluations = [];
+        $errors = [];
 
         foreach ($evaluationsData as $evaluationData) {
+
+            $existingEvaluation = Evaluation_Teacher::where('user_id', $evaluationData['user_id'])
+                ->where('evaluation_criterias_id', $evaluationData['evaluation_criterias_id'])
+                ->first();
+
+            if ($existingEvaluation) {
+
+                return response()->json([
+                    'message' => 'Evaluation already exists for this user and criteria.'
+                ], 201);
+
+            }
+
+
             $evaluation = Evaluation_Teacher::create([
                 'user_id' => $evaluationData['user_id'],
                 'evaluation' => $evaluationData['evaluation'],
@@ -42,7 +57,7 @@ class EvaluationTeacherController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Evaluations created successfully.',
+            'message' => 'Evaluations processed successfully.',
             'data' => $createdEvaluations,
         ], 201);
     }
@@ -88,14 +103,18 @@ class EvaluationTeacherController extends Controller
     public function showTeacherEvaluations(Request $request, $id)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1 && $userRole !== 2 ) {
+        if ($userRole !== 1 && $userRole !== 2 && $userRole !== 3) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        // Validate that day, month, and year are provided and valid
         $request->validate([
+            'day' => 'nullable|integer|between:1,31',
             'month' => 'nullable|integer|between:1,12',
             'year' => 'nullable|integer|min:2000|max:2100',
         ], [
+            'day.integer' => 'The day must be an integer.',
+            'day.between' => 'The day must be between 1 and 31.',
             'month.integer' => 'The month must be an integer.',
             'month.between' => 'The month must be between 1 and 12.',
             'year.integer' => 'The year must be an integer.',
@@ -103,16 +122,28 @@ class EvaluationTeacherController extends Controller
             'year.max' => 'The year must be less than or equal to 2100.',
         ]);
 
+        // Query for evaluations
         $evaluationsQuery = Evaluation_Teacher::where('user_id', $id);
 
+        // Filter based on day, month, and year if provided
+        if ($request->filled('day') && $request->filled('month') && $request->filled('year')) {
+            $day = $request->input('day');
+            $month = $request->input('month');
+            $year = $request->input('year');
 
-
-        if ($request->filled('month') && $request->filled('year')) {
+            $evaluationsQuery->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereDay('created_at', $day);
+        } elseif ($request->filled('month') && $request->filled('year')) {
             $month = $request->input('month');
             $year = $request->input('year');
 
             $evaluationsQuery->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month);
+        } elseif ($request->filled('year')) {
+            $year = $request->input('year');
+
+            $evaluationsQuery->whereYear('created_at', $year);
         }
 
         $evaluations = $evaluationsQuery->get();
@@ -120,15 +151,20 @@ class EvaluationTeacherController extends Controller
         if ($evaluations->isEmpty()) {
             return response()->json(['message' => 'No evaluations found for the specified teacher.'], 404);
         }
+
         $user = User::find($id);
         $userName = $user ? $user->first_name . ' ' . $user->last_name : 'Unknown User';
+
+        // Mapping the evaluations with day, month, and year
         $output = $evaluations->map(function ($evaluation) {
             return [
                 'id' => $evaluation->id,
                 'note' => $evaluation->Note,
                 'evaluation' => $evaluation->evaluation,
                 'evaluation_criteria' => $evaluation->evaluation_criterias->evaluation_criterias,
-                'created_at' => $evaluation->created_at->format('Y-m-d H:i:s'),
+                'day' => $evaluation->created_at->format('d'),  // Extract day
+                'month' => $evaluation->created_at->format('F'), // Extract full month name
+                'year' => $evaluation->created_at->format('Y'),  // Extract year
             ];
         });
 
@@ -194,18 +230,95 @@ class EvaluationTeacherController extends Controller
         ]);
     }
 
-    public function deleteTeacherEvaluation(Request $request,$evaluationId)
+    public function deleteTeacherEvaluation(Request $request)
     {
         $userRole = auth()->user()->role_id;
-        if ($userRole !== 1 && $userRole !== 2 ) {
+        if ($userRole !== 1 && $userRole !== 2) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $evaluation = Evaluation_Teacher::find($evaluationId);
-        $evaluation->delete();
+
+        $userId = $request->input('user_id');
+        $day = $request->input('day');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+
+        if (!$userId || !$day || !$month || !$year) {
+            return response()->json(['message' => 'User ID, day, month, and year are required.'], 400);
+        }
+
+        try {
+
+            $date = Carbon::createFromDate($year, $month, $day)->toDateString();
+
+
+            $deletedCount = Evaluation_Teacher::where('user_id', $userId)
+                ->whereDate('created_at', $date)
+                ->delete();
+
+            if ($deletedCount === 0) {
+                return response()->json(['message' => 'No evaluations found for the specified user and date.'], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Evaluations deleted successfully.',
+
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error deleting evaluations: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getTeacherEvaluationsByYear(Request $request, $teacherId)
+    {
+
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        $userRole = $user->role_id;
+        if ($userRole !== 1 && $userRole !== 2 && $userRole !== 3) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'year' => 'required|integer|min:2000|max:2100',
+        ]);
+
+        $year = $request->input('year');
+
+
+        $evaluations = Evaluation_Teacher::where('user_id', $teacherId)
+            ->whereYear('created_at', $year)
+            ->orderBy('created_at')
+            ->get();
+
+
+        $evaluationsGroupedByDate = $evaluations->groupBy(function ($evaluation) {
+            return $evaluation->created_at->format('Y-m-d');
+        });
+
+        $result = [];
+        foreach ($evaluationsGroupedByDate as $date => $evaluationsOnDate) {
+            $chunks = $evaluationsOnDate->chunk(4);
+            foreach ($chunks as $chunk) {
+                $monthName = $chunk->first()->created_at->format('F');
+                $result[] = [
+                    'month' => $monthName,
+                    'date' => $date,
+                ];
+            }
+        }
+
+        if (empty($result)) {
+            return response()->json(['message' => 'No evaluations found for the specified teacher in the given year.'], 404);
+        }
 
         return response()->json([
             'status' => true,
-            'message' => 'Evaluation deleted successfully. ',
+            'evaluations' => $result,
         ]);
     }
 }

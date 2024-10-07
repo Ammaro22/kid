@@ -124,7 +124,7 @@ Route::delete('delete_reservation_by_admin/{id}', [ReservationController::class,
 /*التقيمات*/
 Route::post('add_evaluation',[EvaluationController::class,'createEvaluation'])->middleware('auth:api');
 Route::post('update_evaluation/{id}',[EvaluationController::class,'updateEvaluation'])->middleware('auth:api');
-Route::delete('delete_evaluation/{id}',[EvaluationController::class,'deleteEvaluation'])->middleware('auth:api');
+Route::delete('deleteevaluation',[EvaluationController::class,'delete_Evaluation'])->middleware('auth:api');
 Route::post('show__evaluationstudent_by_day/{id}',[EvaluationController::class,'showEvaluations']);
 Route::post('show__evaluationstudent_by_month/{id}',[EvaluationController::class,'showEvaluationsmonth']);
 Route::post('show__evaluationstudent_by_category/{id}',[EvaluationController::class,'getEvaluationsByCategoryId']);
@@ -174,7 +174,8 @@ Route::delete('delete_homework/{id}',[HomeworkController::class,'destroy'])->mid
 /*استفسارات الاهل*/
 Route::post('create_parent_note',[ParentsNoteController::class,'createParentNote'])->middleware('auth:api');
 Route::post('update_parent_note/{parent_note_id}',[ParentsNoteController::class,'updateParentNote'])->middleware('auth:api');
-Route::get('get_parent_note_for_parent',[ParentsNoteController::class,'getParentNotesForToday'])->middleware('auth:api');
+Route::post('get_parent_note_for_parent_now',[ParentsNoteController::class,'getParentNotesForToday'])->middleware('auth:api');
+Route::post('get_parent_note_for_parent',[ParentsNoteController::class,'getParentNotesForDate'])->middleware('auth:api');
 Route::delete('delete_parent_note/{id}',[ParentsNoteController::class,'deleteParentNote'])->middleware('auth:api');
 
 /*رد المعلمة*/
@@ -194,4 +195,5 @@ Route::post('create_evaluation_teacher',[EvaluationTeacherController::class,'cre
 Route::post('update_evaluation_teacher/{evaluation_teacher_id}',[EvaluationTeacherController::class,'updateTeacherEvaluation'])->middleware('auth:api');
 Route::post('get_evaluation_teacher_to_admin/{user_id}',[EvaluationTeacherController::class,'showTeacherEvaluations'])->middleware('auth:api');
 Route::post('get_evaluation_teacher_to_teacher',[EvaluationTeacherController::class,'showTeacherEvaluationstoteacher'])->middleware('auth:api');
-Route::delete('delete_evaluation/{id}',[EvaluationTeacherController::class,'deleteTeacherEvaluation'])->middleware('auth:api');
+Route::post('getTeacherEvaluationsByYear/{teacherId}', [EvaluationTeacherController::class, 'getTeacherEvaluationsByYear'])->middleware('auth:api');
+Route::delete('delete_evaluation',[EvaluationTeacherController::class,'deleteTeacherEvaluation'])->middleware('auth:api');

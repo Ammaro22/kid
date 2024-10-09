@@ -18,47 +18,6 @@ use Illuminate\Support\Facades\DB;
 class EvaluationController extends Controller
 {
 
-//    public function createEvaluation(Request $request)
-//    {
-//        $userRole = auth()->user()->role_id;
-//        if ($userRole !== 3) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//
-//        $studentId = $request->input('student_id');
-//        $subjects = $request->input('subjects');
-//        $noteTeacher = $request->input('note_teacher');
-//
-//        $student = Student::find($studentId);
-//
-//        if (!$student) {
-//            return response()->json(['error' => 'student not found'], 404);
-//        }
-//
-//        $note = Note::create([
-//            'student_id' => $student->id,
-//            'note_teacher' => $noteTeacher
-//        ]);
-//
-//        foreach ($subjects as $subject) {
-//            $subjectName = $subject['name'];
-//            $evaluationValue = $subject['evaluation'];
-//            $subjectModel = Subject::where('name', $subjectName)->first();
-//
-//            if (!$subjectModel) {
-//                return response()->json(['error' => 'subject not found'], 404);
-//            }
-//
-//            $evaluation = new Evaluation();
-//            $evaluation->student_id = $student->id;
-//            $evaluation->subject_id = $subjectModel->id;
-//            $evaluation->note_id = $note->id;
-//            $evaluation->evaluation = $evaluationValue;
-//            $evaluation->save();
-//        }
-//
-//        return response()->json(['message' => 'Evaluations create successfully']);
-//    }
 
     public function createEvaluation(Request $request)
     {
@@ -218,7 +177,7 @@ class EvaluationController extends Controller
                 }
             }
 
-            
+
             if ($studentEvaluations->isNotEmpty()) {
                 foreach ($studentEvaluations as $studentEvaluation) {
                     $studentEvaluation->delete();
@@ -260,7 +219,7 @@ class EvaluationController extends Controller
         $formattedEvaluations = $evaluations->map(function ($evaluation, $index) {
             return [
                 'id' => $evaluation->id,
-                'Weekly_Evaluation_' . ($index + 1) => $evaluation->Evaluation,
+                'Weekly_Evaluation' => $evaluation->Evaluation,
                 'student_id' => $evaluation->student_id,
                 'created_at' => $evaluation->created_at->format('Y-m-d'),
 
